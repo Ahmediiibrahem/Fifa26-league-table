@@ -7,6 +7,36 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
+    /* تحسين التابات */
+nav {
+    display: flex;
+    justify-content: center; /* توسيط التابات */
+    gap: 20px; /* مسافة بين التابات */
+    margin-bottom: 20px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #fff; /* لون النص */
+    font-weight: 700;
+    padding: 10px 25px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: #2b2b2b; /* خلفية التاب */
+}
+
+nav a:hover {
+    background: #3498db; /* خلفية عند المرور بالفأرة */
+    color: #fff;
+    transform: scale(1.05); /* تكبير خفيف عند hover */
+}
+
+nav a.active {
+    background: #3498db; /* لون التاب النشط */
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
 body {
     background:#0f0f0f;
     font-family:'Cairo', Arial, sans-serif;
@@ -30,8 +60,9 @@ tr:nth-child(even) { background:#1a1a1a; }
 <!-- قائمة التنقل -->
 <nav>
   <a href="index.html">League Table</a>
-  <a href="matches.html">Match Results</a>
+  <a href="matches.html" class="active">Match Results</a>
 </nav>
+
 
 <h2>Match Results</h2>
 
