@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Match Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body {
+    background:#0f0f0f;
+    font-family:'Cairo', Arial, sans-serif;
+    color:#fff;
+    font-weight:700;
+}
+h2 { text-align:center; margin-bottom:15px; }
+table { width:100%; border-collapse: collapse; font-size:14px; margin-top:10px;}
+th { background:#2b2b2b; padding:10px; font-weight:800;}
+td { padding:8px; text-align:center; }
+tr:nth-child(even) { background:#1a1a1a; }
+.round-separator { background:#444; height:5px; } /* فاصل بين الجولات */
+</style>
+</head>
+<body>
+
+<h2>Match Results</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Home Team</th>
+  <th>Home Score</th>
+  <th>Away Score</th>
+  <th>Away Team</th>
+</tr>
+</thead>
+<tbody id="resultsBody"></tbody>
+</table>
+
+<script>
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv"; // ضع رابط CSV لشيت Matches
+
+function parseCSV(text) {
+    return text.trim().split("\n").map(row =>
+        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, ''))
+    );
+}
+
+fetch(sheetURL)
+.then(res => res.text())
+.then(csv => {
+    const allData = parseCSV(csv).slice(1, 66); // الصفوف 1 إلى 65
+    const tbody = document.getElementById("resultsBody");
+    tbody.innerHTML = "";
+
+    let matchCount = 0;
+    allData.forEach((match, index) => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${match[1]}</td> <!-- MatchID -->
+            <td>${match[2]}</td> <!-- Home Team -->
+            <td>${match[6]}</td> <!-- Home Score -->
+            <td>${match[7]}</td> <!-- Away Score -->
+            <td>${match[11]}</td> <!-- Away Team -->
+        </tr>`;
+
+        matchCount++;
+        // بعد كل 8 مباريات، نضيف صف فاصل
+        if (matchCount % 8 === 0) {
+            tbody.innerHTML += `<tr class="round-separator"><td colspan="5"></td></tr>`;
+        }
+    });
+})
+.catch(err => console.error("Error loading sheet:", err));
+</script>
+
+</body>
+</html>
