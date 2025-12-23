@@ -56,7 +56,7 @@ function parseCSV(text) {
 fetch(sheetURL)
 .then(res => res.text())
 .then(csv => {
-    const allData = parseCSV(csv).slice(1, 66); // الصفوف 1 إلى 65 بعد الهيدر
+    const allData = parseCSV(csv).slice(1, 67); // الصفوف 1 إلى 66 بعد الهيدر
     const tbody = document.getElementById("resultsBody");
     tbody.innerHTML = "";
 
