@@ -100,8 +100,8 @@ fetch(sheetURL)
 .then(csv => {
     const data = parseCSV(csv);
 
-    // نعرض من الصف 1 لحد 23 (بعد الهيدر)
-    const rows = data.slice(1, 24);
+    // نعرض من الصف 1 لحد 17 (بعد الهيدر)
+    const rows = data.slice(1, 18);
 
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
