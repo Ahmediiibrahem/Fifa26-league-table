@@ -13,15 +13,42 @@ body {
     padding:20px;
 }
 
-select {
-    padding:8px 12px;
-    font-size:16px;
+h2 {
+    text-align:center;
     margin-bottom:20px;
+}
+
+.team-tabs {
+    display: flex;
+    flex-wrap: wrap; /* لو الفرق كتير، يبقى سطر جديد */
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.team-tab {
+    background: #2b2b2b;
+    color: #fff;
+    padding: 8px 15px;
+    margin: 2px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.3s;
+}
+
+.team-tab:hover {
+    background: #444;
+}
+
+.team-tab.active {
+    background: #ffcc00;
+    color: #000;
 }
 
 .stats {
     margin-top:20px;
     font-size:16px;
+    text-align:center;
 }
 
 .stats div {
@@ -30,22 +57,15 @@ select {
 </style>
 </head>
 <body>
-    <nav>
-  <a href="index.html">Standings</a>
-  <a href="matches.html" class="active">Results</a>
-  <a href="upcoming.html">Upcoming</a>
-  <a href="team-stats.html">Team Stats</a>
-    
-</nav>
 
 <h2>Team Statistics</h2>
 
-<select id="teamSelect">
-    <option value="">Select a Team</option>
-</select>
+<div id="teamTabs" class="team-tabs">
+    <!-- أسماء الفرق تتحول لتابات هنا -->
+</div>
 
 <div class="stats" id="statsDisplay">
-    <!-- الإحصائيات هتظهر هنا -->
+    <!-- الإحصائيات تظهر هنا -->
 </div>
 
 <script>
@@ -57,7 +77,7 @@ function parseCSV(text) {
     );
 }
 
-const teamSelect = document.getElementById("teamSelect");
+const teamTabs = document.getElementById("teamTabs");
 const statsDisplay = document.getElementById("statsDisplay");
 let allData = [];
 
@@ -66,30 +86,30 @@ fetch(sheetURL, {cache: "no-store"})
 .then(csv => {
     allData = parseCSV(csv).slice(1); // تجاهل الهيدر
 
-    // حصر كل أسماء الفرق بدون تكرار
+    // جمع أسماء الفرق بدون تكرار
     const teams = new Set();
     allData.forEach(match => {
         if(match[2]) teams.add(match[2]); // Home Team
         if(match[11]) teams.add(match[11]); // Away Team
     });
 
-    // إضافة الفرق للقائمة
+    // إنشاء التابات
     teams.forEach(team => {
-        const option = document.createElement("option");
-        option.value = team;
-        option.textContent = team;
-        teamSelect.appendChild(option);
+        const tab = document.createElement("div");
+        tab.textContent = team;
+        tab.classList.add("team-tab");
+        tab.addEventListener("click", () => showTeamStats(team, tab));
+        teamTabs.appendChild(tab);
     });
 });
 
-teamSelect.addEventListener("change", () => {
-    const team = teamSelect.value;
-    if(!team) {
-        statsDisplay.innerHTML = "";
-        return;
-    }
+// دالة عرض الإحصائيات + الأهداف
+function showTeamStats(team, clickedTab) {
+    // تفعيل تاب واحد فقط
+    document.querySelectorAll(".team-tab").forEach(t => t.classList.remove("active"));
+    clickedTab.classList.add("active");
 
-    let played = 0, won = 0, draw = 0, lost = 0;
+    let played = 0, won = 0, draw = 0, lost = 0, goalsFor = 0, goalsAgainst = 0;
 
     allData.forEach(match => {
         const status = match[15]?.trim(); // Match Status
@@ -98,14 +118,24 @@ teamSelect.addEventListener("change", () => {
         const homeScore = parseInt(match[6]);
         const awayScore = parseInt(match[7]);
 
-        if(status !== "Played") return; // احسب فقط المباريات اللي اتلعبت
+        if(status !== "Played") return;
 
-        if(homeTeam === team || awayTeam === team) {
+        if(homeTeam === team || awayTeam === team){
             played++;
 
+            // حساب الفوز / التعادل / الخسارة
             if(homeScore === awayScore) draw++;
             else if((homeTeam === team && homeScore > awayScore) || (awayTeam === team && awayScore > homeScore)) won++;
             else lost++;
+
+            // حساب الأهداف
+            if(homeTeam === team){
+                goalsFor += homeScore;
+                goalsAgainst += awayScore;
+            } else {
+                goalsFor += awayScore;
+                goalsAgainst += homeScore;
+            }
         }
     });
 
@@ -114,8 +144,10 @@ teamSelect.addEventListener("change", () => {
         <div>Won: ${won}</div>
         <div>Draw: ${draw}</div>
         <div>Lost: ${lost}</div>
+        <div>Goals For: ${goalsFor}</div>
+        <div>Goals Against: ${goalsAgainst}</div>
     `;
-});
+}
 </script>
 
 </body>
