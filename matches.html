@@ -56,22 +56,16 @@ function parseCSV(text) {
 fetch(sheetURL)
 .then(res => res.text())
 .then(csv => {
-    const allData = parseCSV(csv).slice(1, 66); // الصفوف 1 إلى 65
+    const allData = parseCSV(csv).slice(1, 66); // الصفوف 1 إلى 65 بعد الهيدر
     const tbody = document.getElementById("resultsBody");
     tbody.innerHTML = "";
 
-    let matchCount = 0;
-    allData.forEach((match, index) => {
-        tbody.innerHTML += `
-        
     let matchCount = 0;
     allData.forEach((match, index) => {
         // نتأكد أن الصف يحتوي البيانات المطلوبة
         if(!match[1] || !match[2] || !match[6] || !match[7] || !match[11]) return;
 
         tbody.innerHTML += `
-
-            
         <tr>
             <td>${match[1]}</td> <!-- MatchID -->
             <td>${match[2]}</td> <!-- Home Team -->
@@ -81,7 +75,7 @@ fetch(sheetURL)
         </tr>`;
 
         matchCount++;
-        // بعد كل 8 مباريات، نضيف صف فاصل
+        // بعد كل 8 مباريات، نضيف فاصل
         if (matchCount % 8 === 0) {
             tbody.innerHTML += `<tr class="round-separator"><td colspan="5"></td></tr>`;
         }
