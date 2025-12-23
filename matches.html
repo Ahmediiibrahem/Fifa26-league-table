@@ -63,6 +63,15 @@ fetch(sheetURL)
     let matchCount = 0;
     allData.forEach((match, index) => {
         tbody.innerHTML += `
+        
+    let matchCount = 0;
+    allData.forEach((match, index) => {
+        // نتأكد أن الصف يحتوي البيانات المطلوبة
+        if(!match[1] || !match[2] || !match[6] || !match[7] || !match[11]) return;
+
+        tbody.innerHTML += `
+
+            
         <tr>
             <td>${match[1]}</td> <!-- MatchID -->
             <td>${match[2]}</td> <!-- Home Team -->
