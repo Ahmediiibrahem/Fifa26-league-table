@@ -46,13 +46,18 @@ h2 {
 }
 
 .stats {
-    margin-top:20px;
-    font-size:16px;
-    text-align:center;
+    display: flex;
+    justify-content: space-between; /* يمين ويسار */
+    margin-top: 20px;
+    font-size: 16px;
 }
 
-.stats div {
-    margin-bottom:8px;
+.stats-left, .stats-right {
+    width: 48%; /* نص تقريبا لكل جزء */
+}
+
+.stats-left div, .stats-right div {
+    margin-bottom: 8px;
 }
 </style>
 </head>
@@ -65,7 +70,8 @@ h2 {
 </div>
 
 <div class="stats" id="statsDisplay">
-    <!-- الإحصائيات تظهر هنا -->
+    <div class="stats-left"></div>
+    <div class="stats-right"></div>
 </div>
 
 <script>
@@ -86,17 +92,14 @@ fetch(sheetURL, {cache: "no-store"})
 .then(csv => {
     allData = parseCSV(csv).slice(1); // تجاهل الهيدر
 
-    // جمع أسماء الفرق بدون تكرار
+    // جمع أسماء الفرق بدون تكرار وتجاهل أي كلمة خاطئة
     const teams = new Set();
     allData.forEach(match => {
-    const home = match[2]?.trim();  // إزالة أي فراغات من اسم الفريق
-    const away = match[11]?.trim(); // إزالة أي فراغات من اسم الفريق
-
-    // تجاهل أي قيمة غير صحيحة، زي "lose" أو فراغات
-    if(home && home.toLowerCase() !== "lose") teams.add(home);
-    if(away && away.toLowerCase() !== "lose") teams.add(away);
-});
-
+        const home = match[2]?.trim();
+        const away = match[11]?.trim();
+        if(home && home.toLowerCase() !== "lose") teams.add(home);
+        if(away && away.toLowerCase() !== "lose") teams.add(away);
+    });
 
     // إنشاء التابات
     teams.forEach(team => {
@@ -108,7 +111,7 @@ fetch(sheetURL, {cache: "no-store"})
     });
 });
 
-// دالة عرض الإحصائيات + الأهداف
+// دالة عرض الإحصائيات + الأهداف + فارق الأهداف + النقاط + اللاعبين
 function showTeamStats(team, clickedTab) {
     // تفعيل تاب واحد فقط
     document.querySelectorAll(".team-tab").forEach(t => t.classList.remove("active"));
@@ -128,12 +131,10 @@ function showTeamStats(team, clickedTab) {
         if(homeTeam === team || awayTeam === team){
             played++;
 
-            // حساب الفوز / التعادل / الخسارة
             if(homeScore === awayScore) draw++;
             else if((homeTeam === team && homeScore > awayScore) || (awayTeam === team && awayScore > homeScore)) won++;
             else lost++;
 
-            // حساب الأهداف
             if(homeTeam === team){
                 goalsFor += homeScore;
                 goalsAgainst += awayScore;
@@ -144,13 +145,27 @@ function showTeamStats(team, clickedTab) {
         }
     });
 
+    const goalDiff = goalsFor - goalsAgainst;
+    const points = won * 3 + draw * 1;
+
+    // اللاعبين (مثال ثابت)
+    const players = ["Ahmed Ibrahem", "Abdoulrahman Atef"];
+
     statsDisplay.innerHTML = `
-        <div>Played: ${played}</div>
-        <div>Won: ${won}</div>
-        <div>Draw: ${draw}</div>
-        <div>Lost: ${lost}</div>
-        <div>Goals For: ${goalsFor}</div>
-        <div>Goals Against: ${goalsAgainst}</div>
+        <div class="stats-left">
+            <div>Played: ${played}</div>
+            <div>Won: ${won}</div>
+            <div>Draw: ${draw}</div>
+            <div>Lost: ${lost}</div>
+            <div>Goals For: ${goalsFor}</div>
+            <div>Goals Against: ${goalsAgainst}</div>
+            <div>Goal Difference: ${goalDiff}</div>
+            <div>Points: ${points}</div>
+        </div>
+        <div class="stats-right">
+            <div>Players:</div>
+            ${players.map(p => `<div>${p}</div>`).join('')}
+        </div>
     `;
 }
 </script>
