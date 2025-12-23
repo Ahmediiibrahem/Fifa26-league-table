@@ -3,39 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <title>League Table</title>
+
 <style>
 body {
     background:#0f0f0f;
     font-family: Arial, sans-serif;
     color:#fff;
 }
+
+h2 {
+    text-align:center;
+    margin-bottom:15px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
+    font-size:14px;
 }
+
 th {
     background:#2b2b2b;
     padding:10px;
 }
+
 td {
     padding:8px;
     text-align:center;
 }
+
 tr:nth-child(even) {
     background:#1a1a1a;
 }
+
+.rank {
+    background:#3a3a3a;
+    font-weight:bold;
+}
+
 .team {
     text-align:left;
 }
-.rank {
-    background:#3a3a3a;
-}
 </style>
 </head>
+
 <body>
 
 <h2>League Table</h2>
-<table id="table">
+
+<table>
 <thead>
 <tr>
 <th>#</th>
@@ -52,40 +68,53 @@ tr:nth-child(even) {
 <th>Owner</th>
 </tr>
 </thead>
+
 <tbody></tbody>
 </table>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+const sheetURL = "PUT_YOUR_CSV_LINK_HERE";
+
+function parseCSV(text) {
+    const rows = text.trim().split("\n");
+    return rows.map(row =>
+        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+            .map(col => col.replace(/^"|"$/g, ''))
+    );
+}
 
 fetch(sheetURL)
 .then(res => res.text())
 .then(csv => {
-    const rows = csv.split("\n").slice(1);
+    const data = parseCSV(csv);
+
+    // نعرض من الصف 2 لحد 17 (بعد الهيدر)
+    const rows = data.slice(1, 18);
+
     const tbody = document.querySelector("tbody");
+    tbody.innerHTML = "";
 
-    rows.slice(0, 17).forEach((row, index) => {
-    const cols = row.split(",");
+    rows.forEach((cols, index) => {
+        if (!cols[1]) return;
 
-    tbody.innerHTML += `
-    <tr>
-        <td class="rank">${index + 1}</td>
-        <td>
-            <img src="${cols[0]}" width="28">
-        </td>
-        <td class="team">${cols[1]}</td>
-        <td>${cols[2]}</td>
-        <td>${cols[3]}</td>
-        <td>${cols[4]}</td>
-        <td>${cols[5]}</td>
-        <td>${cols[6]}</td>
-        <td>${cols[7]}</td>
-        <td>${cols[8]}</td>
-        <td>${cols[9]}</td>
-        <td>${cols[10]}</td>
-    </tr>`;
-});
-
+        tbody.innerHTML += `
+        <tr>
+            <td class="rank">${index + 1}</td>
+            <td><img src="${cols[0]}" width="28"></td>
+            <td class="team">${cols[1]}</td>
+            <td>${cols[2]}</td>
+            <td>${cols[3]}</td>
+            <td>${cols[4]}</td>
+            <td>${cols[5]}</td>
+            <td>${cols[6]}</td>
+            <td>${cols[7]}</td>
+            <td>${cols[8]}</td>
+            <td>${cols[9]}</td>
+            <td>${cols[10]}</td>
+        </tr>`;
+    });
+})
+.catch(err => console.error("Error loading sheet:", err));
 </script>
 
 </body>
