@@ -136,7 +136,10 @@ function parseCSV(text) {
     );
 }
 
-fetch(sheetURL)
+fetch(sheetURL + "&t=" + Date.now(), {
+    cache: "no-store"
+})
+
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv);
