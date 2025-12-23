@@ -68,7 +68,6 @@ tr:nth-child(even) {
 <thead>
 <tr>
 <th>#</th>
-<th>Logo</th>
 <th>Team</th>
 <th>P</th>
 <th>W</th>
@@ -101,30 +100,30 @@ fetch(sheetURL)
 .then(csv => {
     const data = parseCSV(csv);
 
-    // نعرض من الصف 2 لحد 17 (بعد الهيدر)
-    const rows = data.slice(1, 18);
+    // نعرض من الصف 1 لحد 23 (بعد الهيدر)
+    const rows = data.slice(1, 24);
 
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
 
     rows.forEach((cols, index) => {
-        if (!cols[1]) return;
+        if (!cols[3]) return;
 
         tbody.innerHTML += `
         <tr>
             <td class="rank">${index + 1}</td>
-            <td><img src="${cols[1]}" width="28"></td>
-            <td class="team">${cols[1]}</td>
-            <td>${cols[2]}</td>
-            <td>${cols[3]}</td>
-            <td>${cols[4]}</td>
-            <td>${cols[5]}</td>
-            <td>${cols[6]}</td>
-            <td>${cols[7]}</td>
-            <td>${cols[8]}</td>
-            <td>${cols[9]}</td>
-            <td>${cols[10]}</td>
+            <td class="team">${cols[2]}</td>   <!-- العمود C -->
+            <td>${cols[3]}</td>                <!-- العمود D -->
+            <td>${cols[4]}</td>                <!-- العمود E -->
+            <td>${cols[5]}</td>                <!-- العمود F -->
+            <td>${cols[6]}</td>                <!-- العمود G -->
+            <td>${cols[7]}</td>                <!-- العمود H -->
+            <td>${cols[8]}</td>                <!-- العمود I -->
+            <td>${cols[9]}</td>                <!-- العمود J -->
+            <td>${cols[10]}</td>               <!-- العمود K -->
+            <td>${cols[11]}</td>               <!-- العمود L -->
         </tr>`;
+
     });
 })
 .catch(err => console.error("Error loading sheet:", err));
