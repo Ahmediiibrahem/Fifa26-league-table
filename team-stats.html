@@ -89,9 +89,14 @@ fetch(sheetURL, {cache: "no-store"})
     // جمع أسماء الفرق بدون تكرار
     const teams = new Set();
     allData.forEach(match => {
-        if(match[2]) teams.add(match[2]); // Home Team
-        if(match[11]) teams.add(match[11]); // Away Team
-    });
+    const home = match[2]?.trim();  // إزالة أي فراغات من اسم الفريق
+    const away = match[11]?.trim(); // إزالة أي فراغات من اسم الفريق
+
+    // تجاهل أي قيمة غير صحيحة، زي "lose" أو فراغات
+    if(home && home.toLowerCase() !== "lose") teams.add(home);
+    if(away && away.toLowerCase() !== "lose") teams.add(away);
+});
+
 
     // إنشاء التابات
     teams.forEach(team => {
