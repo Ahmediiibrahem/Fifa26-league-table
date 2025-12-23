@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Team Statistics</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body {
+    background:#0f0f0f;
+    color:#fff;
+    font-family:'Cairo', Arial, sans-serif;
+    font-weight:700;
+    padding:20px;
+}
+
+select {
+    padding:8px 12px;
+    font-size:16px;
+    margin-bottom:20px;
+}
+
+.stats {
+    margin-top:20px;
+    font-size:16px;
+}
+
+.stats div {
+    margin-bottom:8px;
+}
+</style>
+</head>
+<body>
+
+<h2>Team Statistics</h2>
+
+<select id="teamSelect">
+    <option value="">Select a Team</option>
+</select>
+
+<div class="stats" id="statsDisplay">
+    <!-- الإحصائيات هتظهر هنا -->
+</div>
+
+<script>
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t=" + Date.now();
+
+function parseCSV(text) {
+    return text.trim().split("\n").map(row =>
+        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, ''))
+    );
+}
+
+const teamSelect = document.getElementById("teamSelect");
+const statsDisplay = document.getElementById("statsDisplay");
+let allData = [];
+
+fetch(sheetURL, {cache: "no-store"})
+.then(res => res.text())
+.then(csv => {
+    allData = parseCSV(csv).slice(1); // تجاهل الهيدر
+
+    // حصر كل أسماء الفرق بدون تكرار
+    const teams = new Set();
+    allData.forEach(match => {
+        if(match[2]) teams.add(match[2]); // Home Team
+        if(match[11]) teams.add(match[11]); // Away Team
+    });
+
+    // إضافة الفرق للقائمة
+    teams.forEach(team => {
+        const option = document.createElement("option");
+        option.value = team;
+        option.textContent = team;
+        teamSelect.appendChild(option);
+    });
+});
+
+teamSelect.addEventListener("change", () => {
+    const team = teamSelect.value;
+    if(!team) {
+        statsDisplay.innerHTML = "";
+        return;
+    }
+
+    let played = 0, won = 0, draw = 0, lost = 0;
+
+    allData.forEach(match => {
+        const status = match[15]?.trim(); // Match Status
+        const homeTeam = match[2];
+        const awayTeam = match[11];
+        const homeScore = parseInt(match[6]);
+        const awayScore = parseInt(match[7]);
+
+        if(status !== "Played") return; // احسب فقط المباريات اللي اتلعبت
+
+        if(homeTeam === team || awayTeam === team) {
+            played++;
+
+            if(homeScore === awayScore) draw++;
+            else if((homeTeam === team && homeScore > awayScore) || (awayTeam === team && awayScore > homeScore)) won++;
+            else lost++;
+        }
+    });
+
+    statsDisplay.innerHTML = `
+        <div>Played: ${played}</div>
+        <div>Won: ${won}</div>
+        <div>Draw: ${draw}</div>
+        <div>Lost: ${lost}</div>
+    `;
+});
+</script>
+
+</body>
+</html>
