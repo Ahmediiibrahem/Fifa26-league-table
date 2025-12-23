@@ -90,7 +90,10 @@ function parseCSV(text) {
     );
 }
 
-fetch(sheetURL)
+fetch(sheetURL + "&t=" + Date.now(), {
+    cache: "no-store"
+})
+
 .then(res => res.text())
 .then(csv => {
     const allData = parseCSV(csv).slice(1, 67); // الصفوف 1 إلى 66 بعد الهيدر
