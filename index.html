@@ -39,6 +39,7 @@ tr:nth-child(even) {
 <thead>
 <tr>
 <th>#</th>
+<th>Logo</th>
 <th>Team</th>
 <th>P</th>
 <th>W</th>
@@ -47,7 +48,7 @@ tr:nth-child(even) {
 <th>DIFF</th>
 <th>G/S</th>
 <th>G/C</th>
-<th>POINTS</th>
+<th>Points</th>
 <th>Owner</th>
 </tr>
 </thead>
@@ -63,26 +64,28 @@ fetch(sheetURL)
     const rows = csv.split("\n").slice(1);
     const tbody = document.querySelector("tbody");
 
-    rows.forEach((row, index) => {
-        const cols = row.split(",");
-        if(cols.length > 1){
-            tbody.innerHTML += `
-            <tr>
-                <td class="rank">${index+1}</td>
-                <td class="team">${cols[0]}</td>
-                <td>${cols[1]}</td>
-                <td>${cols[2]}</td>
-                <td>${cols[3]}</td>
-                <td>${cols[4]}</td>
-                <td>${cols[5]}</td>
-                <td>${cols[6]}</td>
-                <td>${cols[7]}</td>
-                <td>${cols[8]}</td>
-                <td>${cols[9]}</td>
-            </tr>`;
-        }
-    });
+    rows.slice(0, 17).forEach((row, index) => {
+    const cols = row.split(",");
+
+    tbody.innerHTML += `
+    <tr>
+        <td class="rank">${index + 1}</td>
+        <td>
+            <img src="${cols[0]}" width="28">
+        </td>
+        <td class="team">${cols[1]}</td>
+        <td>${cols[2]}</td>
+        <td>${cols[3]}</td>
+        <td>${cols[4]}</td>
+        <td>${cols[5]}</td>
+        <td>${cols[6]}</td>
+        <td>${cols[7]}</td>
+        <td>${cols[8]}</td>
+        <td>${cols[9]}</td>
+        <td>${cols[10]}</td>
+    </tr>`;
 });
+
 </script>
 
 </body>
