@@ -79,17 +79,19 @@ fetch(sheetURL + "&t=" + Date.now(), {
     upcomingBody.innerHTML = "";
 
     allData.forEach(match => {
-        if(!match[1] || !match[2] || !match[11] || !match[12]) return;
 
-        if(match[12] === "Upcoming") {
-            upcomingBody.innerHTML += `
-            <tr>
-                <td>${match[1]}</td>
-                <td>${match[2]}</td>
-                <td>${match[11]}</td>
-            </tr>`;
-        }
-    });
+    if (!match[1] || !match[2] || !match[11] || !match[15]) return;
+
+    if (match[15].trim() === "Upcoming") {
+        upcomingBody.innerHTML += `
+        <tr>
+            <td>${match[1]}</td>
+            <td>${match[2]}</td>
+            <td>${match[11]}</td>
+        </tr>`;
+    }
+});
+
 })
 .catch(err => console.error("Error loading sheet:", err));
 </script>
