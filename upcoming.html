@@ -69,7 +69,10 @@ function parseCSV(text) {
 
 const upcomingBody = document.getElementById("upcomingBody");
 
-fetch(sheetURL)
+fetch(sheetURL + "&t=" + Date.now(), {
+    cache: "no-store"
+})
+
 .then(res => res.text())
 .then(csv => {
     const allData = parseCSV(csv).slice(1);
