@@ -63,24 +63,19 @@ fetch(sheetURL)
 
     let matchCount = 0;
     allData.forEach((match, index) => {
-        // نتأكد أن الصف يحتوي البيانات المطلوبة
-        if(!match[1] || !match[2] || !match[6] || !match[7] || !match[11]) return;
+    tbody.innerHTML += `
+    <tr>
+        <td>${match[1]}</td>
+        <td>${match[2]}</td>
+        <td>${match[6]}</td>
+        <td>${match[7]}</td>
+        <td>${match[11]}</td>
+    </tr>`;
 
-        tbody.innerHTML += `
-        <tr>
-            <td>${match[1]}</td> <!-- MatchID -->
-            <td>${match[2]}</td> <!-- Home Team -->
-            <td>${match[6]}</td> <!-- Home Score -->
-            <td>${match[7]}</td> <!-- Away Score -->
-            <td>${match[11]}</td> <!-- Away Team -->
-        </tr>`;
-
-        matchCount++;
-        // بعد كل 8 مباريات، نضيف فاصل
-        if (matchCount % 8 === 0) {
-            tbody.innerHTML += `<tr class="round-separator"><td colspan="5"></td></tr>`;
-        }
-    });
+    if ((index + 1) % 8 === 0) {
+        tbody.innerHTML += `<tr class="round-separator"><td colspan="5"></td></tr>`;
+    }
+});
 })
 .catch(err => console.error("Error loading sheet:", err));
 </script>
