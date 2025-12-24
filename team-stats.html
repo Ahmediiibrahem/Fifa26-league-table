@@ -17,22 +17,15 @@ body{
     font-weight:700;
 }
 
-/* ===== Header ===== */
+/* Header */
 .page-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:10px 30px;
 }
-
-.owner-header{
-    text-align:center;
-}
-
-.header-logo{
-    height:100px;
-}
-
+.owner-header{text-align:center;}
+.header-logo{height:100px;}
 .owner-points{
     margin-top:6px;
     font-size:14px;
@@ -40,7 +33,7 @@ body{
     color:#f1c40f;
 }
 
-/* ===== Navbar ===== */
+/* Navbar */
 nav{
     display:flex;
     justify-content:center;
@@ -55,11 +48,9 @@ nav a{
     border-radius:8px;
 }
 nav a.active,
-nav a:hover{
-    background:#3498db;
-}
+nav a:hover{background:#3498db;}
 
-/* ===== Levels ===== */
+/* Levels */
 .level{
     max-width:1100px;
     margin:25px auto;
@@ -75,77 +66,79 @@ nav a:hover{
 }
 .team-tab{
     background:#2b2b2b;
-    padding:12px;
-    border-radius:10px;
+    padding:14px 10px;
+    border-radius:12px;
     text-align:center;
     cursor:pointer;
-    transition:.3s;
     position:relative;
+    transition:.3s;
 }
-.team-tab .points-circle{
+.team-tab:hover,
+.team-tab.active{background:#3498db;}
+
+.team-points{
     position:absolute;
     top:8px;
     right:8px;
     background:#f1c40f;
     color:#000;
-    border-radius:50%;
     width:28px;
     height:28px;
+    border-radius:50%;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:14px;
-    font-weight:bold;
+    font-size:13px;
+    font-weight:800;
 }
 
-/* ===== Stats Box ===== */
+/* Stats */
 .stats{
     display:none;
-    max-width:900px;
+    max-width:950px;
     margin:35px auto;
     background:rgba(0,0,0,.45);
-    padding:25px;
-    border-radius:14px;
-    gap:40px;
-    display:flex;
+    padding:30px;
+    border-radius:16px;
+    gap:30px;
 }
-.stats-left,.stats-right{
-    width:50%;
-}
+
+.stats-left,.stats-right{width:50%;}
+
 .stats-left{
-    border-right:1px solid #fff;
-    padding-right:20px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
 }
-.stats-left div{
-    background:rgba(0,0,0,0.45);
-    margin-bottom:10px;
-    padding:10px;
-    border-radius:10px;
-    font-size:16px;
+
+.stat-card{
+    background:#1e1e1e;
+    border-radius:12px;
+    padding:15px;
+    text-align:center;
 }
-.stats-left div b{
+.stat-card span{
     display:block;
-    margin-bottom:5px;
+    font-size:26px;
+    font-weight:800;
+    margin-top:5px;
     color:#f1c40f;
 }
+
+.stats-divider{
+    width:1px;
+    background:#444;
+}
+
 .stats-right div{
-    background:rgba(0,0,0,0.45);
     margin-bottom:10px;
-    padding:10px;
-    border-radius:10px;
-    font-size:16px;
-}
-.stats-right div b{
-    display:block;
-    margin-bottom:5px;
-    color:#f1c40f;
+    font-size:15px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== Header ===== -->
 <div class="page-header">
     <div class="owner-header">
         <img src="left-logo.png" class="header-logo">
@@ -157,7 +150,6 @@ nav a:hover{
     </div>
 </div>
 
-<!-- ===== Navbar ===== -->
 <nav>
     <a href="index.html">Standings</a>
     <a href="matches.html">Results</a>
@@ -165,138 +157,115 @@ nav a:hover{
     <a href="team-stats.html" class="active">Stats</a>
 </nav>
 
-<!-- ===== Levels + Teams ===== -->
 <div id="levels"></div>
 
-<!-- ===== Stats ===== -->
 <div id="statsDisplay" class="stats"></div>
 
 <script>
-const matchesURL =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t="+Date.now();
+const matchesURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t="+Date.now();
+const teamsURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t="+Date.now();
 
-const teamsURL =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t="+Date.now();
-
-function parseCSV(text){
-    return text.trim().split("\n").map(r =>
-        r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,''))
-    );
+function parseCSV(t){
+    return t.trim().split("\n").map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,'')));
 }
 
 let matches=[], teams=[];
 
-Promise.all([
-    fetch(matchesURL).then(r=>r.text()),
-    fetch(teamsURL).then(r=>r.text())
-]).then(([m,t])=>{
+Promise.all([fetch(matchesURL).then(r=>r.text()),fetch(teamsURL).then(r=>r.text())])
+.then(([m,t])=>{
     matches=parseCSV(m).slice(1);
     teams=parseCSV(t).slice(1).map(r=>({
-        name:r[1],
-        country:r[3],
-        level:r[5],
-        owner:r[6],
-        rank:r[7]
+        name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7], points:0
     }));
 
-    calcOwnerPoints();
+    calcTeamPoints();
     renderLevels();
+    calcOwnerPoints();
 });
 
-function calcOwnerPoints(){
-    let ahmed=0, abdo=0;
-
+function calcTeamPoints(){
     teams.forEach(team=>{
         let pts=0;
         matches.forEach(m=>{
-            if(m[15]!=="Played")return;
-            const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+            if(m[15]?.trim()!=="Played")return;
+            const h=m[2],a=m[11],hs=+m[6]||0,as=+m[7]||0;
             if(h===team.name||a===team.name){
-                if(hs===as) pts+=1;
+                if(hs===as) pts++;
                 else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) pts+=3;
             }
         });
-        if(team.owner==="Ahmed Ibrahem") ahmed+=pts;
-        if(team.owner==="Abdoulrahman Atef") abdo+=pts;
-        team.points=pts; // حفظ نقاط الفريق داخل الكائن
+        team.points=pts;
     });
-
-    document.getElementById("ahmedPts").textContent="Points: "+ahmed;
-    document.getElementById("abdoPts").textContent="Points: "+abdo;
 }
 
 function renderLevels(){
-    const container=document.getElementById("levels");
-    [1,2,3,4].forEach(level=>{
-        const block=document.createElement("div");
-        block.className="level";
-        block.innerHTML=`<h3>Level ${level}</h3><div class="team-tabs"></div>`;
-
-        teams.filter(t=>t.level==level)
-             .sort((a,b)=>b.points-a.points)
-             .forEach(team=>{
-                 const tab=document.createElement("div");
-                 tab.className="team-tab";
-                 tab.textContent=team.name;
-                 const span=document.createElement("div");
-                 span.className="points-circle";
-                 span.textContent=team.points;
-                 tab.appendChild(span);
-                 tab.onclick=(e)=>showStats(team,e.currentTarget);
-                 block.querySelector(".team-tabs").appendChild(tab);
-             });
-
-        container.appendChild(block);
+    const c=document.getElementById("levels");
+    c.innerHTML="";
+    [1,2,3,4].forEach(l=>{
+        const b=document.createElement("div");
+        b.className="level";
+        b.innerHTML=`<h3>Level ${l}</h3><div class="team-tabs"></div>`;
+        teams.filter(t=>t.level==l).sort((a,b)=>b.points-a.points)
+        .forEach(team=>{
+            const tab=document.createElement("div");
+            tab.className="team-tab";
+            tab.innerHTML=`${team.name}<div class="team-points">${team.points}</div>`;
+            tab.onclick=e=>showStats(team,e.currentTarget);
+            b.querySelector(".team-tabs").appendChild(tab);
+        });
+        c.appendChild(b);
     });
-}
-
-function cardRight(title,value){
-    return `<div><b>${title}</b>${value}</div>`;
 }
 
 function showStats(team,tab){
     document.querySelectorAll(".team-tab").forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
 
-    let played=0, won=0, draw=0, lost=0, gf=0, ga=0;
-
+    let p=0,w=0,d=0,l=0,gf=0,ga=0;
     matches.forEach(m=>{
-        if(m[15]!=="Played")return;
-        const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+        if(m[15]?.trim()!=="Played")return;
+        const h=m[2],a=m[11],hs=+m[6]||0,as=+m[7]||0;
         if(h===team.name||a===team.name){
-            played++;
-            if(hs===as) draw++;
-            else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) won++;
-            else lost++;
-
-            if(h===team.name){ gf+=hs; ga+=as; }
-            else{ gf+=as; ga+=hs; }
+            p++;
+            if(hs===as)d++;
+            else if((h===team.name&&hs>as)||(a===team.name&&as>hs))w++;
+            else l++;
+            if(h===team.name){gf+=hs;ga+=as}else{gf+=as;ga+=hs}
         }
     });
 
-    const pts=won*3+draw;
-
-    const box=document.getElementById("statsDisplay");
-    box.style.display="flex";
-    box.innerHTML=`
+    document.getElementById("statsDisplay").style.display="flex";
+    document.getElementById("statsDisplay").innerHTML=`
         <div class="stats-left">
-            <div><b>Played</b>${played}</div>
-            <div><b>Won</b>${won}</div>
-            <div><b>Draw</b>${draw}</div>
-            <div><b>Lost</b>${lost}</div>
-            <div><b>Goals For</b>${gf}</div>
-            <div><b>Goals Against</b>${ga}</div>
-            <div><b>Goal Difference</b>${gf-ga}</div>
-            <div><b>Points</b>${pts}</div>
+            ${card("Played",p)}
+            ${card("Won",w)}
+            ${card("Draw",d)}
+            ${card("Lost",l)}
+            ${card("Goals For",gf)}
+            ${card("Goals Against",ga)}
+            ${card("Goal Diff",gf-ga)}
+            ${card("Points",w*3+d)}
         </div>
+        <div class="stats-divider"></div>
         <div class="stats-right">
-            ${cardRight("Team", team.name)}
-            ${cardRight("Owner", team.owner)}
-            ${cardRight("Country", team.country)}
-            ${cardRight("Level", team.level)}
-            ${cardRight("International Rank", team.rank)}
-        </div>
-    `;
+            <div><b>Team:</b> ${team.name}</div>
+            <div><b>Owner:</b> ${team.owner}</div>
+            <div><b>Country:</b> ${team.country}</div>
+            <div><b>Level:</b> ${team.level}</div>
+            <div><b>International Rank:</b> ${team.rank}</div>
+        </div>`;
+}
+
+function card(t,v){return `<div class="stat-card">${t}<span>${v}</span></div>`;}
+
+function calcOwnerPoints(){
+    let a=0,b=0;
+    teams.forEach(t=>{
+        if(t.owner==="Ahmed Ibrahem")a+=t.points;
+        if(t.owner==="Abdoulrahman Atef")b+=t.points;
+    });
+    ahmedPts.textContent="Points: "+a;
+    abdoPts.textContent="Points: "+b;
 }
 </script>
 
