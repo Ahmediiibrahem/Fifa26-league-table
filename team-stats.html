@@ -30,7 +30,7 @@ body{
     margin-top:6px;
     font-size:14px;
     font-weight:800;
-    color:#fff;
+    color:#fff; /* تم تغييره لأبيض */
 }
 
 /* Navbar */
@@ -73,8 +73,23 @@ nav a:hover{background:#3498db;}
     position:relative;
     transition:.3s;
 }
-.team-tab:hover,
-.team-tab.active{background:#3498db;}
+
+.team-tab::after{
+    content:"";
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:0%;
+    height:3px;
+    background:#fff;  /* اللون الأبيض */
+    border-radius:2px;
+    transition:width 0.3s ease;
+}
+
+.team-tab.active::after{
+    width:80%;
+}
 
 .team-points{
     position:absolute;
@@ -126,26 +141,14 @@ nav a:hover{background:#3498db;}
     color:#fff;
 }
 
-/* Stats right */
-.stats-right{
-    display:flex;
-    flex-direction:column;
-}
-.stats-right .stat-card{
-    background:#1e1e1e;
-    border-radius:12px;
-    padding:15px;
-    text-align:center;
-    margin-bottom:12px;
-    transition: all 0.3s ease;
-}
-.stats-right .stat-card:hover{
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-}
 .stats-divider{
     width:1px;
     background:#444;
+}
+
+.stats-right div{
+    margin-bottom:10px;
+    font-size:15px;
 }
 </style>
 </head>
@@ -171,6 +174,7 @@ nav a:hover{background:#3498db;}
 </nav>
 
 <div id="levels"></div>
+
 <div id="statsDisplay" class="stats"></div>
 
 <script>
@@ -186,7 +190,10 @@ let matches=[], teams=[];
 Promise.all([fetch(matchesURL).then(r=>r.text()),fetch(teamsURL).then(r=>r.text())])
 .then(([m,t])=>{
     matches=parseCSV(m).slice(1);
-    teams=parseCSV(t).slice(1).map(r=>({name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7], points:0}));
+    teams=parseCSV(t).slice(1).map(r=>({
+        name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7], points:0
+    }));
+
     calcTeamPoints();
     renderLevels();
     calcOwnerPoints();
@@ -243,37 +250,35 @@ function showStats(team,tab){
         }
     });
 
-    const pts=w*3+d;
-
-    const box=document.getElementById("statsDisplay");
-    box.style.display="flex";
-    box.innerHTML=`
+    document.getElementById("statsDisplay").style.display="flex";
+    document.getElementById("statsDisplay").innerHTML=`
         <div class="stats-left">
-            <div class="stat-card">Played<span>${p}</span></div>
-            <div class="stat-card">Won<span>${w}</span></div>
-            <div class="stat-card">Draw<span>${d}</span></div>
-            <div class="stat-card">Lost<span>${l}</span></div>
-            <div class="stat-card">Goals For<span>${gf}</span></div>
-            <div class="stat-card">Goals Against<span>${ga}</span></div>
-            <div class="stat-card">Goal Diff<span>${gf-ga}</span></div>
-            <div class="stat-card">Points<span>${pts}</span></div>
+            ${card("Played",p)}
+            ${card("Won",w)}
+            ${card("Draw",d)}
+            ${card("Lost",l)}
+            ${card("Goals For",gf)}
+            ${card("Goals Against",ga)}
+            ${card("Goal Diff",gf-ga)}
+            ${card("Points",w*3+d)}
         </div>
         <div class="stats-divider"></div>
         <div class="stats-right">
-            <div class="stat-card">Team: <span>${team.name}</span></div>
-            <div class="stat-card">Owner: <span>${team.owner}</span></div>
-            <div class="stat-card">Country: <span>${team.country}</span></div>
-            <div class="stat-card">Level: <span>${team.level}</span></div>
-            <div class="stat-card">International Rank: <span>${team.rank}</span></div>
-        </div>
-    `;
+            <div><b>Team:</b> ${team.name}</div>
+            <div><b>Owner:</b> ${team.owner}</div>
+            <div><b>Country:</b> ${team.country}</div>
+            <div><b>Level:</b> ${team.level}</div>
+            <div><b>International Rank:</b> ${team.rank}</div>
+        </div>`;
 }
+
+function card(t,v){return `<div class="stat-card">${t}<span>${v}</span></div>`;}
 
 function calcOwnerPoints(){
     let a=0,b=0;
     teams.forEach(t=>{
-        if(t.owner==="Ahmed Ibrahem") a+=t.points;
-        if(t.owner==="Abdoulrahman Atef") b+=t.points;
+        if(t.owner==="Ahmed Ibrahem")a+=t.points;
+        if(t.owner==="Abdoulrahman Atef")b+=t.points;
     });
     ahmedPts.textContent="Points: "+a;
     abdoPts.textContent="Points: "+b;
