@@ -24,8 +24,15 @@ body{
     align-items:center;
     padding:10px 30px;
 }
-.owner-header{text-align:center;}
-.header-logo{height:100px;}
+
+.owner-header{
+    text-align:center;
+}
+
+.header-logo{
+    height:100px;
+}
+
 .owner-points{
     margin-top:6px;
     font-size:14px;
@@ -47,7 +54,10 @@ nav a{
     padding:10px 25px;
     border-radius:8px;
 }
-nav a.active,nav a:hover{background:#3498db;}
+nav a.active,
+nav a:hover{
+    background:#3498db;
+}
 
 /* ===== Levels ===== */
 .level{
@@ -66,78 +76,54 @@ nav a.active,nav a:hover{background:#3498db;}
 .team-tab{
     background:#2b2b2b;
     padding:12px;
-    border-radius:12px;
+    border-radius:10px;
+    text-align:center;
     cursor:pointer;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
     transition:.3s;
 }
-.team-tab:hover,.team-tab.active{background:#3498db;}
-.team-name{font-size:14px;}
-.team-points{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    background:#f1c40f;
-    color:#000;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:13px;
-    font-weight:800;
+.team-tab:hover,
+.team-tab.active{
+    background:#3498db;
 }
 
-/* ===== Stats ===== */
+/* ===== Stats Box ===== */
 .stats{
     display:none;
-    max-width:950px;
+    max-width:900px;
     margin:35px auto;
-    background:rgba(0,0,0,.5);
-    padding:30px;
-    border-radius:18px;
-    gap:30px;
+    background:rgba(0,0,0,.45);
+    padding:25px;
+    border-radius:14px;
+    gap:40px;
 }
-.stats-left,.stats-right{width:50%;}
-
-.stats-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
+.stats-left,.stats-right{
+    width:50%;
 }
-.stat-card{
-    background:#1f1f1f;
-    padding:15px;
-    border-radius:12px;
-    text-align:center;
+.stats-left div,
+.stats-right div{
+    margin-bottom:8px;
 }
-.stat-card span{
-    display:block;
-    font-size:22px;
-    color:#f1c40f;
-}
-.stat-card small{
-    font-size:13px;
-    opacity:.85;
-}
-
-.stats-right div{margin-bottom:10px;}
 </style>
 </head>
 
 <body>
 
+<!-- ===== Header ===== -->
 <div class="page-header">
+
     <div class="owner-header">
         <img src="left-logo.png" class="header-logo">
         <div id="ahmedPts" class="owner-points">Points: 0</div>
     </div>
+
     <div class="owner-header">
         <img src="right-logo.png" class="header-logo">
         <div id="abdoPts" class="owner-points">Points: 0</div>
     </div>
+
 </div>
 
+<!-- ===== Navbar ===== -->
 <nav>
     <a href="index.html">Standings</a>
     <a href="matches.html">Results</a>
@@ -145,120 +131,128 @@ nav a.active,nav a:hover{background:#3498db;}
     <a href="team-stats.html" class="active">Stats</a>
 </nav>
 
+<!-- ===== Levels + Teams ===== -->
 <div id="levels"></div>
+
+<!-- ===== Stats ===== -->
 <div id="statsDisplay" class="stats"></div>
 
 <script>
-const matchesURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t="+Date.now();
-const teamsURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t="+Date.now();
+const matchesURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t="+Date.now();
 
-function parseCSV(t){
-    return t.trim().split("\n").map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,'')));
+const teamsURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t="+Date.now();
+
+function parseCSV(text){
+    return text.trim().split("\n").map(r =>
+        r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,''))
+    );
 }
 
-let matches=[],teams=[];
+let matches=[], teams=[];
 
 Promise.all([
-fetch(matchesURL).then(r=>r.text()),
-fetch(teamsURL).then(r=>r.text())
+    fetch(matchesURL).then(r=>r.text()),
+    fetch(teamsURL).then(r=>r.text())
 ]).then(([m,t])=>{
-matches=parseCSV(m).slice(1);
-teams=parseCSV(t).slice(1).map(r=>({
-    name:r[1],country:r[3],level:r[5],owner:r[6],rank:r[7],points:0
-}));
+    matches=parseCSV(m).slice(1);
+    teams=parseCSV(t).slice(1).map(r=>({
+        name:r[1],
+        country:r[3],
+        level:r[5],
+        owner:r[6],
+        rank:r[7]
+    }));
 
-calcTeamPoints();
-renderLevels();
-calcOwnerPoints();
+    renderLevels();
+    calcOwnerPoints();
 });
-
-function calcTeamPoints(){
-teams.forEach(team=>{
-let pts=0;
-matches.forEach(m=>{
-if(m[15]!=="Played")return;
-const h=m[2],a=m[11],hs=+m[6],as=+m[7];
-if(h===team.name||a===team.name){
-if(hs===as)pts+=1;
-else if((h===team.name&&hs>as)||(a===team.name&&as>hs))pts+=3;
-}
-});
-team.points=pts;
-});
-}
 
 function renderLevels(){
-const container=document.getElementById("levels");
-[1,2,3,4].forEach(level=>{
-const block=document.createElement("div");
-block.className="level";
-block.innerHTML=`<h3>Level ${level}</h3><div class="team-tabs"></div>`;
+    const container=document.getElementById("levels");
+    [1,2,3,4].forEach(level=>{
+        const block=document.createElement("div");
+        block.className="level";
+        block.innerHTML=`<h3>Level ${level}</h3><div class="team-tabs"></div>`;
 
-teams.filter(t=>t.level==level)
-.sort((a,b)=>b.points-a.points)
-.forEach(team=>{
-const tab=document.createElement("div");
-tab.className="team-tab";
-tab.innerHTML=`
-<span class="team-name">${team.name}</span>
-<span class="team-points">${team.points}</span>`;
-tab.onclick=(e)=>showStats(team,tab);
-block.querySelector(".team-tabs").appendChild(tab);
-});
-container.appendChild(block);
-});
+        teams.filter(t=>t.level==level).forEach(team=>{
+            const tab=document.createElement("div");
+            tab.className="team-tab";
+            tab.textContent=team.name;
+            tab.onclick=(e)=>showStats(team,e.target);
+            block.querySelector(".team-tabs").appendChild(tab);
+        });
+
+        container.appendChild(block);
+    });
 }
 
 function showStats(team,tab){
-document.querySelectorAll(".team-tab").forEach(t=>t.classList.remove("active"));
-tab.classList.add("active");
+    document.querySelectorAll(".team-tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
 
-let p=w=d=l=gf=ga=0;
-matches.forEach(m=>{
-if(m[15]!=="Played")return;
-const h=m[2],a=m[11],hs=+m[6],as=+m[7];
-if(h===team.name||a===team.name){
-p++;
-if(hs===as)d++;
-else if((h===team.name&&hs>as)||(a===team.name&&as>hs))w++;
-else l++;
-if(h===team.name){gf+=hs;ga+=as}else{gf+=as;ga+=hs}
-}
-});
+    let played=0,won=0,draw=0,lost=0,gf=0,ga=0;
 
-const box=document.getElementById("statsDisplay");
-box.style.display="flex";
-box.innerHTML=`
-<div class="stats-left">
-<div class="stats-grid">
-<div class="stat-card"><span>${p}</span><small>Played</small></div>
-<div class="stat-card"><span>${w}</span><small>Won</small></div>
-<div class="stat-card"><span>${d}</span><small>Draw</small></div>
-<div class="stat-card"><span>${l}</span><small>Lost</small></div>
-<div class="stat-card"><span>${gf}</span><small>Goals For</small></div>
-<div class="stat-card"><span>${ga}</span><small>Goals Against</small></div>
-<div class="stat-card"><span>${gf-ga}</span><small>Goal Diff</small></div>
-<div class="stat-card"><span>${team.points}</span><small>Points</small></div>
-</div>
-</div>
+    matches.forEach(m=>{
+        if(m[15]!=="Played")return;
+        const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+        if(h===team.name||a===team.name){
+            played++;
+            if(hs===as) draw++;
+            else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) won++;
+            else lost++;
 
-<div class="stats-right">
-<div><b>Team:</b> ${team.name}</div>
-<div><b>Owner:</b> ${team.owner}</div>
-<div><b>Country:</b> ${team.country}</div>
-<div><b>Level:</b> ${team.level}</div>
-<div><b>International Rank:</b> ${team.rank}</div>
-</div>`;
+            if(h===team.name){ gf+=hs; ga+=as; }
+            else{ gf+=as; ga+=hs; }
+        }
+    });
+
+    const pts=won*3+draw;
+
+    const box=document.getElementById("statsDisplay");
+    box.style.display="flex";
+    box.innerHTML=`
+        <div class="stats-left">
+            <div>Played: ${played}</div>
+            <div>Won: ${won}</div>
+            <div>Draw: ${draw}</div>
+            <div>Lost: ${lost}</div>
+            <div>Goals For: ${gf}</div>
+            <div>Goals Against: ${ga}</div>
+            <div>Goal Difference: ${gf-ga}</div>
+            <div>Points: ${pts}</div>
+        </div>
+        <div class="stats-right">
+            <div><b>Team:</b> ${team.name}</div>
+            <div><b>Owner:</b> ${team.owner}</div>
+            <div><b>Country:</b> ${team.country}</div>
+            <div><b>Level:</b> ${team.level}</div>
+            <div><b>International Rank:</b> ${team.rank}</div>
+        </div>
+    `;
 }
 
 function calcOwnerPoints(){
-let ah=0,ab=0;
-teams.forEach(t=>{
-if(t.owner==="Ahmed Ibrahem")ah+=t.points;
-if(t.owner==="Abdoulrahman Atef")ab+=t.points;
-});
-document.getElementById("ahmedPts").textContent="Points: "+ah;
-document.getElementById("abdoPts").textContent="Points: "+ab;
+    let ahmed=0, abdo=0;
+
+    teams.forEach(team=>{
+        let pts=0;
+        matches.forEach(m=>{
+            if(m[15]!=="Played")return;
+            const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+            if(h===team.name||a===team.name){
+                if(hs===as) pts+=1;
+                else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) pts+=3;
+            }
+        });
+
+        if(team.owner==="Ahmed Ibrahem") ahmed+=pts;
+        if(team.owner==="Abdoulrahman Atef") abdo+=pts;
+    });
+
+    document.getElementById("ahmedPts").textContent="Points: "+ahmed;
+    document.getElementById("abdoPts").textContent="Points: "+abdo;
 }
 </script>
 
