@@ -8,7 +8,6 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
-
 body {
     font-family:'Cairo', Arial, sans-serif;
     color:#fff;
@@ -30,10 +29,9 @@ body {
 }
 
 .header-logo {
-    height: 100px;   /* نفس المقاس */
+    height: 100px; 
     object-fit: contain;
 }
-
 
 /* ===== Navbar ===== */
 nav {
@@ -61,6 +59,13 @@ nav a.active {
 h2 { text-align:center; margin-bottom:15px; }
 
 /* ===== Team Tabs ===== */
+.level-title {
+    margin: 20px auto 10px;
+    max-width: 900px;
+    font-weight: 700;
+    font-size: 16px;
+}
+
 .team-tabs {
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -97,6 +102,8 @@ h2 { text-align:center; margin-bottom:15px; }
     padding:25px;
     border-radius:14px;
     gap:40px;
+    display:flex;
+    justify-content: space-between;
 }
 
 .stats-left,
@@ -128,111 +135,114 @@ h2 { text-align:center; margin-bottom:15px; }
 
 <h2>Team Statistics</h2>
 
-<div id="teamTabs" class="team-tabs"></div>
+<div id="tabsContainer"></div>
 
 <div id="statsDisplay" class="stats"></div>
 
 <script>
-const sheetURL =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t=" + Date.now();
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t=" + Date.now();
+const teamsSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t=" + Date.now();
 
-const teamsSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv";
-
-    
 function parseCSV(text) {
     return text.trim().split("\n").map(r =>
         r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,''))
     );
 }
 
-const teamTabs = document.getElementById("teamTabs");
+const tabsContainer = document.getElementById("tabsContainer");
 const statsDisplay = document.getElementById("statsDisplay");
 let allData = [];
+let teamsByLevel = {};
 
+// أولاً: نقرأ الماتشات
 fetch(sheetURL, {cache:"no-store"})
 .then(res => res.text())
 .then(csv => {
     allData = parseCSV(csv).slice(1);
-
-    const teams = new Set();
-    allData.forEach(m => {
-        const h = m[2]?.trim();
-        const a = m[11]?.trim();
-        if(h && h.toLowerCase() !== "lose") teams.add(h);
-        if(a && a.toLowerCase() !== "lose") teams.add(a);
-    });
-
-    [...teams].forEach(team => {
-        const tab = document.createElement("div");
-        tab.className = "team-tab";
-        tab.textContent = team;
-        tab.onclick = () => showTeamStats(team, tab);
-        teamTabs.appendChild(tab);
-    });
 });
 
-function showTeamStats(team, tab) {
+// ثانياً: نقرأ شيت الفرق ونجهز التابات حسب Level
+fetch(teamsSheetURL, {cache:"no-store"})
+.then(res => res.text())
+.then(csv => {
+    const rows = parseCSV(csv).slice(1);
+    rows.forEach(r => {
+        const teamName = r[1];
+        const level = r[5];
+        const owner = r[6];
 
-    document.querySelectorAll(".team-tab")
-        .forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
+        if(!teamsByLevel[level]) teamsByLevel[level] = [];
+        teamsByLevel[level].push({teamName, owner});
+    });
+
+    // إنشاء التابات لكل Level
+    Object.keys(teamsByLevel).sort().forEach(level => {
+        const levelTitle = document.createElement("div");
+        levelTitle.className = "level-title";
+        levelTitle.textContent = "Level " + level;
+        tabsContainer.appendChild(levelTitle);
+
+        const levelTabs = document.createElement("div");
+        levelTabs.className = "team-tabs";
+
+        teamsByLevel[level].forEach(team => {
+            const tab = document.createElement("div");
+            tab.className = "team-tab";
+            tab.textContent = team.teamName;
+            tab.onclick = () => showTeamStats(team);
+            levelTabs.appendChild(tab);
+        });
+
+        tabsContainer.appendChild(levelTabs);
+    });
+})
+.catch(err => console.error("Teams sheet error:", err));
+
+// دالة عرض إحصائيات الفريق
+function showTeamStats(team) {
+    // تفعيل التاب
+    document.querySelectorAll(".team-tab").forEach(t => t.classList.remove("active"));
+    event.currentTarget?.classList.add("active");
 
     let played=0, won=0, draw=0, lost=0, gf=0, ga=0;
 
     allData.forEach(m => {
         if(m[15]?.trim() !== "Played") return;
-
         const h=m[2], a=m[11];
         const hs=+m[6], as=+m[7];
 
-        if(h===team || a===team){
+        if(h===team.teamName || a===team.teamName){
             played++;
             if(hs===as) draw++;
-            else if((h===team && hs>as)||(a===team && as>hs)) won++;
+            else if((h===team.teamName && hs>as)||(a===team.teamName && as>hs)) won++;
             else lost++;
 
-            if(h===team){ gf+=hs; ga+=as; }
+            if(h===team.teamName){ gf+=hs; ga+=as; }
             else { gf+=as; ga+=hs; }
         }
     });
 
-    const gd = gf-ga;
+    const gd = gf - ga;
     const pts = won*3 + draw;
 
-    statsDisplay.style.display = "flex";
+    statsDisplay.style.display="flex";
     statsDisplay.innerHTML = `
         <div class="stats-left">
-            <div>Played: ${played}</div>
-            <div>Won: ${won}</div>
-            <div>Draw: ${draw}</div>
-            <div>Lost: ${lost}</div>
-            <div>Goals For: ${gf}</div>
-            <div>Goals Against: ${ga}</div>
-            <div>Goal Difference: ${gd}</div>
-            <div>Points: ${pts}</div>
+            <div><strong>Played:</strong> ${played}</div>
+            <div><strong>Won:</strong> ${won}</div>
+            <div><strong>Draw:</strong> ${draw}</div>
+            <div><strong>Lost:</strong> ${lost}</div>
+            <div><strong>Goals For:</strong> ${gf}</div>
+            <div><strong>Goals Against:</strong> ${ga}</div>
+            <div><strong>Goal Diff:</strong> ${gd}</div>
+            <div><strong>Points:</strong> ${pts}</div>
         </div>
         <div class="stats-right">
-            <div><strong>Team:</strong> ${team}</div>
+            <div><strong>Team:</strong> ${team.teamName}</div>
+            <div><strong>Owner:</strong> ${team.owner}</div>
         </div>
     `;
 }
-
-    fetch(teamsSheetURL + "&t=" + Date.now(), { cache: "no-store" })
-  .then(res => res.text())
-  .then(csv => {
-      const rows = parseCSV(csv).slice(1);
-
-      console.log("Teams Sheet:");
-      rows.forEach(r => {
-          console.log({
-              teamName: r[1],
-              level: r[5],
-              owner: r[6]
-          });
-      });
-  })
-  .catch(err => console.error("Teams sheet error:", err));
-
 </script>
 
 </body>
