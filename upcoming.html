@@ -7,12 +7,26 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
+
+    
 body {
-    background:#0f0f0f;
     font-family:'Cairo', Arial, sans-serif;
     color:#fff;
     font-weight:700;
+
+    background:
+        linear-gradient(
+            rgba(15, 15, 15, 0.85),
+            rgba(15, 15, 15, 0.85)
+        ),
+        url("standings-bg.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
+
+    
 h2 { text-align:center; margin-bottom:15px; }
 table { width:100%; border-collapse: collapse; font-size:14px; margin-top:10px;}
 th { background:#2b2b2b; padding:10px; font-weight:800;}
@@ -39,10 +53,18 @@ nav a.active { background: #3498db; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
 </head>
 <body>
 
+    
+   <div class="page-header">
+    <img src="left-logo.png" alt="Left Logo" class="header-logo left">
+    <img src="right-logo.png" alt="Right Logo" class="header-logo right">
+</div>
+
+
 <nav>
   <a href="index.html">Standings</a>
   <a href="matches.html">Results</a>
   <a href="upcoming.html" class="active">Upcoming</a>
+  <a href="team-stats.html">Stats</a>
 </nav>
 
 
