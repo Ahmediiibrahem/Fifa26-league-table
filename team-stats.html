@@ -113,6 +113,12 @@ tr:nth-child(even) {
     border-collapse: collapse;
     
 }
+
+    .stats-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
 </style>
 </head>
 
@@ -135,14 +141,12 @@ tr:nth-child(even) {
 
 <h2>Team Statistics</h2>
 
-<div id="teamTabs" class="team-tabs">
-    <!-- أسماء الفرق تتحول لتابات هنا -->
+<div class="stats-container">
+    <div id="teamTabs" class="team-tabs"></div>
+
+    <div class="stats" id="statsDisplay" style="display:none;"></div>
 </div>
 
-<div class="stats" id="statsDisplay">
-    <div class="stats-left"></div>
-    <div class="stats-right"></div>
-</div>
 
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t=" + Date.now();
@@ -183,6 +187,8 @@ fetch(sheetURL, {cache: "no-store"})
 
 // دالة عرض الإحصائيات + الأهداف + فارق الأهداف + النقاط + اللاعبين
 function showTeamStats(team, clickedTab) {
+    statsDisplay.style.display = "flex";
+
     // تفعيل تاب واحد فقط
     document.querySelectorAll(".team-tab").forEach(t => t.classList.remove("active"));
     clickedTab.classList.add("active");
