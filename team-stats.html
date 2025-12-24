@@ -17,22 +17,15 @@ body{
     font-weight:700;
 }
 
-/* ===== Header ===== */
+/* Header */
 .page-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:10px 30px;
 }
-
-.owner-header{
-    text-align:center;
-}
-
-.header-logo{
-    height:100px;
-}
-
+.owner-header{text-align:center;}
+.header-logo{height:100px;}
 .owner-points{
     margin-top:6px;
     font-size:14px;
@@ -40,7 +33,7 @@ body{
     color:#f1c40f;
 }
 
-/* ===== Navbar ===== */
+/* Navbar */
 nav{
     display:flex;
     justify-content:center;
@@ -55,11 +48,9 @@ nav a{
     border-radius:8px;
 }
 nav a.active,
-nav a:hover{
-    background:#3498db;
-}
+nav a:hover{background:#3498db;}
 
-/* ===== Levels ===== */
+/* Levels */
 .level{
     max-width:1100px;
     margin:25px auto;
@@ -79,14 +70,11 @@ nav a:hover{
     border-radius:10px;
     text-align:center;
     cursor:pointer;
-    transition:.3s;
 }
 .team-tab:hover,
-.team-tab.active{
-    background:#3498db;
-}
+.team-tab.active{background:#3498db;}
 
-/* ===== Stats Box ===== */
+/* Stats */
 .stats{
     display:none;
     max-width:900px;
@@ -96,34 +84,25 @@ nav a:hover{
     border-radius:14px;
     gap:40px;
 }
-.stats-left,.stats-right{
-    width:50%;
-}
+.stats-left,.stats-right{width:50%;}
 .stats-left div,
-.stats-right div{
-    margin-bottom:8px;
-}
+.stats-right div{margin-bottom:8px;}
 </style>
 </head>
 
 <body>
 
-<!-- ===== Header ===== -->
 <div class="page-header">
-
     <div class="owner-header">
         <img src="left-logo.png" class="header-logo">
         <div id="ahmedPts" class="owner-points">Points: 0</div>
     </div>
-
     <div class="owner-header">
         <img src="right-logo.png" class="header-logo">
         <div id="abdoPts" class="owner-points">Points: 0</div>
     </div>
-
 </div>
 
-<!-- ===== Navbar ===== -->
 <nav>
     <a href="index.html">Standings</a>
     <a href="matches.html">Results</a>
@@ -131,10 +110,7 @@ nav a:hover{
     <a href="team-stats.html" class="active">Stats</a>
 </nav>
 
-<!-- ===== Levels + Teams ===== -->
 <div id="levels"></div>
-
-<!-- ===== Stats ===== -->
 <div id="statsDisplay" class="stats"></div>
 
 <script>
@@ -171,6 +147,7 @@ Promise.all([
 
 function renderLevels(){
     const container=document.getElementById("levels");
+    container.innerHTML="";
     [1,2,3,4].forEach(level=>{
         const block=document.createElement("div");
         block.className="level";
@@ -183,7 +160,6 @@ function renderLevels(){
             tab.onclick=(e)=>showStats(team,e.target);
             block.querySelector(".team-tabs").appendChild(tab);
         });
-
         container.appendChild(block);
     });
 }
@@ -195,8 +171,12 @@ function showStats(team,tab){
     let played=0,won=0,draw=0,lost=0,gf=0,ga=0;
 
     matches.forEach(m=>{
-        if(m[15]!=="Played")return;
-        const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+        if(m[15]?.trim()!=="Played") return;
+
+        const h=m[2], a=m[11];
+        const hs=parseInt(m[6]||0);
+        const as=parseInt(m[7]||0);
+
         if(h===team.name||a===team.name){
             played++;
             if(hs===as) draw++;
@@ -209,7 +189,6 @@ function showStats(team,tab){
     });
 
     const pts=won*3+draw;
-
     const box=document.getElementById("statsDisplay");
     box.style.display="flex";
     box.innerHTML=`
@@ -234,13 +213,17 @@ function showStats(team,tab){
 }
 
 function calcOwnerPoints(){
-    let ahmed=0, abdo=0;
+    let ahmed=0,abdo=0;
 
     teams.forEach(team=>{
         let pts=0;
         matches.forEach(m=>{
-            if(m[15]!=="Played")return;
-            const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+            if(m[15]?.trim()!=="Played") return;
+
+            const h=m[2], a=m[11];
+            const hs=parseInt(m[6]||0);
+            const as=parseInt(m[7]||0);
+
             if(h===team.name||a===team.name){
                 if(hs===as) pts+=1;
                 else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) pts+=3;
