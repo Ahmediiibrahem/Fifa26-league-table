@@ -217,6 +217,15 @@ function renderLevels(){
     });
 }
 
+    function cardRight(title, value){
+    return `
+    <div class="stat-card" style="width:100%; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.45); border-radius:10px;">
+        <b>${title}:</b>
+        <div style="font-size:20px; color:#f1c40f; margin-top:5px;">${value}</div>
+    </div>`;
+}
+
+
 function showStats(team,tab){
     document.querySelectorAll(".team-tab").forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
@@ -247,13 +256,13 @@ function showStats(team,tab){
             ${card("Points",w*3+d)}
         </div>
         <div class="stats-divider"></div>
-        <div class="stats-right">
-            <div><b>Team:</b> ${team.name}</div>
-            <div><b>Owner:</b> ${team.owner}</div>
-            <div><b>Country:</b> ${team.country}</div>
-            <div><b>Level:</b> ${team.level}</div>
-            <div><b>International Rank:</b> ${team.rank}</div>
-        </div>`;
+       <div class="stats-right">
+    ${cardRight("Team", team.name)}
+    ${cardRight("Owner", team.owner)}
+    ${cardRight("Country", team.country)}
+    ${cardRight("Level", team.level)}
+    ${cardRight("International Rank", team.rank)}
+</div>;
 }
 
 function card(t,v){return `<div class="stat-card">${t}<span>${v}</span></div>`;}
