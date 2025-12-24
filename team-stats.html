@@ -154,14 +154,14 @@ const statsDisplay = document.getElementById("statsDisplay");
 let allData = [];
 let teamsByLevel = {};
 
-// أولاً: نقرأ الماتشات
+// قراءة ماتشات Played
 fetch(sheetURL, {cache:"no-store"})
 .then(res => res.text())
 .then(csv => {
     allData = parseCSV(csv).slice(1);
 });
 
-// ثانياً: نقرأ شيت الفرق ونجهز التابات حسب Level
+// قراءة شيت الفرق وتجهيز التابات
 fetch(teamsSheetURL, {cache:"no-store"})
 .then(res => res.text())
 .then(csv => {
@@ -170,9 +170,10 @@ fetch(teamsSheetURL, {cache:"no-store"})
         const teamName = r[1];
         const level = r[5];
         const owner = r[6];
+        const country = r[3];
 
         if(!teamsByLevel[level]) teamsByLevel[level] = [];
-        teamsByLevel[level].push({teamName, owner});
+        teamsByLevel[level].push({teamName, owner, country, level});
     });
 
     // إنشاء التابات لكل Level
@@ -189,7 +190,7 @@ fetch(teamsSheetURL, {cache:"no-store"})
             const tab = document.createElement("div");
             tab.className = "team-tab";
             tab.textContent = team.teamName;
-            tab.onclick = () => showTeamStats(team);
+            tab.onclick = () => showTeamStats(team, tab);
             levelTabs.appendChild(tab);
         });
 
@@ -198,11 +199,10 @@ fetch(teamsSheetURL, {cache:"no-store"})
 })
 .catch(err => console.error("Teams sheet error:", err));
 
-// دالة عرض إحصائيات الفريق
-function showTeamStats(team) {
-    // تفعيل التاب
+// عرض الإحصائيات
+function showTeamStats(team, tab) {
     document.querySelectorAll(".team-tab").forEach(t => t.classList.remove("active"));
-    event.currentTarget?.classList.add("active");
+    if(tab) tab.classList.add("active");
 
     let played=0, won=0, draw=0, lost=0, gf=0, ga=0;
 
@@ -240,6 +240,8 @@ function showTeamStats(team) {
         <div class="stats-right">
             <div><strong>Team:</strong> ${team.teamName}</div>
             <div><strong>Owner:</strong> ${team.owner}</div>
+            <div><strong>Country:</strong> ${team.country}</div>
+            <div><strong>Level:</strong> ${team.level}</div>
         </div>
     `;
 }
