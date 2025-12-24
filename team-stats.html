@@ -30,7 +30,7 @@ body{
     margin-top:6px;
     font-size:14px;
     font-weight:800;
-    color:#fff; /* تم تغييره لأبيض */
+    color:#fff; /* اللون الأبيض */
 }
 
 /* Navbar */
@@ -57,7 +57,7 @@ nav a:hover{background:#3498db;}
 }
 .level h3{
     margin-bottom:12px;
-    color:#fff;
+    color:#fff; /* اللون الأبيض */
 }
 .team-tabs{
     display:grid;
@@ -73,29 +73,14 @@ nav a:hover{background:#3498db;}
     position:relative;
     transition:.3s;
 }
-
-.team-tab::after{
-    content:"";
-    position:absolute;
-    bottom:0;
-    left:50%;
-    transform:translateX(-50%);
-    width:0%;
-    height:3px;
-    background:#fff;  /* اللون الأبيض */
-    border-radius:2px;
-    transition:width 0.3s ease;
-}
-
-.team-tab.active::after{
-    width:80%;
-}
+.team-tab:hover,
+.team-tab.active{background:#3498db;}
 
 .team-points{
     position:absolute;
     top:8px;
     right:8px;
-    background:#fff;
+    background:#fff; /* اللون الأبيض */
     color:#000;
     width:28px;
     height:28px;
@@ -119,7 +104,9 @@ nav a:hover{background:#3498db;}
     display:flex;
 }
 
-.stats-left,.stats-right{width:50%;}
+.stats-left,.stats-right{
+    width:50%;
+}
 
 .stats-left{
     display:grid;
@@ -138,7 +125,7 @@ nav a:hover{background:#3498db;}
     font-size:26px;
     font-weight:800;
     margin-top:5px;
-    color:#fff;
+    color:#fff; /* اللون الأبيض */
 }
 
 .stats-divider{
@@ -146,8 +133,17 @@ nav a:hover{background:#3498db;}
     background:#444;
 }
 
-.stats-right div{
-    margin-bottom:10px;
+/* الاحصائيات على اليمين - كل بند كارد على السطر */
+.stats-right{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.stats-right .right-card{
+    background:#1e1e1e;
+    border-radius:12px;
+    padding:12px 15px;
     font-size:15px;
 }
 </style>
@@ -264,15 +260,16 @@ function showStats(team,tab){
         </div>
         <div class="stats-divider"></div>
         <div class="stats-right">
-            <div><b>Team:</b> ${team.name}</div>
-            <div><b>Owner:</b> ${team.owner}</div>
-            <div><b>Country:</b> ${team.country}</div>
-            <div><b>Level:</b> ${team.level}</div>
-            <div><b>International Rank:</b> ${team.rank}</div>
+            ${rightCard("Team",team.name)}
+            ${rightCard("Owner",team.owner)}
+            ${rightCard("Country",team.country)}
+            ${rightCard("Level",team.level)}
+            ${rightCard("International Rank",team.rank)}
         </div>`;
 }
 
 function card(t,v){return `<div class="stat-card">${t}<span>${v}</span></div>`;}
+function rightCard(t,v){return `<div class="right-card"><b>${t}:</b> ${v}</div>`;}
 
 function calcOwnerPoints(){
     let a=0,b=0;
