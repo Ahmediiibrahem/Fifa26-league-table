@@ -179,6 +179,8 @@ fetch(teamsSheetURL)
         owner: r[6].trim(),
         country: r[3].trim(),
         level: r[5].trim()
+        internationalRank: r[7]?.trim() || ''   // عمود International Rank
+}));
     }));
 })
 .catch(err => console.error("Teams sheet error:", err));
@@ -288,6 +290,8 @@ function showTeamStats(team, tab) {
             <div><strong>Owner:</strong> ${info.owner||''}</div>
             <div><strong>Country:</strong> ${info.country||''}</div>
             <div><strong>Level:</strong> ${info.level||''}</div>
+            <div><strong>International Rank:</strong> ${info.internationalRank||''}</div>
+
         </div>
     `;
     statsDisplay.style.display = "flex";
