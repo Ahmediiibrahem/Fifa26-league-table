@@ -30,7 +30,7 @@ body{
     margin-top:6px;
     font-size:14px;
     font-weight:800;
-    color:#fff; /* اللون الأبيض */
+    color:#fff;
 }
 
 /* Navbar */
@@ -57,7 +57,7 @@ nav a:hover{background:#3498db;}
 }
 .level h3{
     margin-bottom:12px;
-    color:#fff; /* اللون الأبيض */
+    color:#fff;
 }
 .team-tabs{
     display:grid;
@@ -80,7 +80,7 @@ nav a:hover{background:#3498db;}
     position:absolute;
     top:8px;
     right:8px;
-    background:#fff; /* اللون الأبيض */
+    background:#fff;
     color:#000;
     width:28px;
     height:28px;
@@ -104,9 +104,7 @@ nav a:hover{background:#3498db;}
     display:flex;
 }
 
-.stats-left,.stats-right{
-    width:50%;
-}
+.stats-left,.stats-right{width:50%;}
 
 .stats-left{
     display:grid;
@@ -125,26 +123,29 @@ nav a:hover{background:#3498db;}
     font-size:26px;
     font-weight:800;
     margin-top:5px;
-    color:#fff; /* اللون الأبيض */
+    color:#fff;
 }
 
-.stats-divider{
-    width:1px;
-    background:#444;
-}
-
-/* الاحصائيات على اليمين - كل بند كارد على السطر */
+/* Stats right */
 .stats-right{
     display:flex;
     flex-direction:column;
-    gap:12px;
 }
-
-.stats-right .right-card{
+.stats-right .stat-card{
     background:#1e1e1e;
     border-radius:12px;
-    padding:12px 15px;
-    font-size:15px;
+    padding:15px;
+    text-align:center;
+    margin-bottom:12px;
+    transition: all 0.3s ease;
+}
+.stats-right .stat-card:hover{
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+.stats-divider{
+    width:1px;
+    background:#444;
 }
 </style>
 </head>
@@ -170,7 +171,6 @@ nav a:hover{background:#3498db;}
 </nav>
 
 <div id="levels"></div>
-
 <div id="statsDisplay" class="stats"></div>
 
 <script>
@@ -186,10 +186,7 @@ let matches=[], teams=[];
 Promise.all([fetch(matchesURL).then(r=>r.text()),fetch(teamsURL).then(r=>r.text())])
 .then(([m,t])=>{
     matches=parseCSV(m).slice(1);
-    teams=parseCSV(t).slice(1).map(r=>({
-        name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7], points:0
-    }));
-
+    teams=parseCSV(t).slice(1).map(r=>({name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7], points:0}));
     calcTeamPoints();
     renderLevels();
     calcOwnerPoints();
@@ -246,36 +243,37 @@ function showStats(team,tab){
         }
     });
 
-    document.getElementById("statsDisplay").style.display="flex";
-    document.getElementById("statsDisplay").innerHTML=`
+    const pts=w*3+d;
+
+    const box=document.getElementById("statsDisplay");
+    box.style.display="flex";
+    box.innerHTML=`
         <div class="stats-left">
-            ${card("Played",p)}
-            ${card("Won",w)}
-            ${card("Draw",d)}
-            ${card("Lost",l)}
-            ${card("Goals For",gf)}
-            ${card("Goals Against",ga)}
-            ${card("Goal Diff",gf-ga)}
-            ${card("Points",w*3+d)}
+            <div class="stat-card">Played<span>${p}</span></div>
+            <div class="stat-card">Won<span>${w}</span></div>
+            <div class="stat-card">Draw<span>${d}</span></div>
+            <div class="stat-card">Lost<span>${l}</span></div>
+            <div class="stat-card">Goals For<span>${gf}</span></div>
+            <div class="stat-card">Goals Against<span>${ga}</span></div>
+            <div class="stat-card">Goal Diff<span>${gf-ga}</span></div>
+            <div class="stat-card">Points<span>${pts}</span></div>
         </div>
         <div class="stats-divider"></div>
         <div class="stats-right">
-            ${rightCard("Team",team.name)}
-            ${rightCard("Owner",team.owner)}
-            ${rightCard("Country",team.country)}
-            ${rightCard("Level",team.level)}
-            ${rightCard("International Rank",team.rank)}
-        </div>`;
+            <div class="stat-card">Team: <span>${team.name}</span></div>
+            <div class="stat-card">Owner: <span>${team.owner}</span></div>
+            <div class="stat-card">Country: <span>${team.country}</span></div>
+            <div class="stat-card">Level: <span>${team.level}</span></div>
+            <div class="stat-card">International Rank: <span>${team.rank}</span></div>
+        </div>
+    `;
 }
-
-function card(t,v){return `<div class="stat-card">${t}<span>${v}</span></div>`;}
-function rightCard(t,v){return `<div class="right-card"><b>${t}:</b> ${v}</div>`;}
 
 function calcOwnerPoints(){
     let a=0,b=0;
     teams.forEach(t=>{
-        if(t.owner==="Ahmed Ibrahem")a+=t.points;
-        if(t.owner==="Abdoulrahman Atef")b+=t.points;
+        if(t.owner==="Ahmed Ibrahem") a+=t.points;
+        if(t.owner==="Abdoulrahman Atef") b+=t.points;
     });
     ahmedPts.textContent="Points: "+a;
     abdoPts.textContent="Points: "+b;
