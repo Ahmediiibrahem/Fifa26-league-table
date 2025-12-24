@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Team Stats</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
@@ -28,9 +27,22 @@ body {
     padding: 10px 20px;
 }
 
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .header-logo {
-    height: 100px; 
+    height: 100px;
     object-fit: contain;
+}
+
+.points-label {
+    margin-top: 5px;
+    font-weight: 700;
+    color: #fff;
+    font-size: 14px;
 }
 
 /* ===== Navbar ===== */
@@ -59,13 +71,6 @@ nav a.active {
 h2 { text-align:center; margin-bottom:15px; }
 
 /* ===== Team Tabs ===== */
-.level-title {
-    margin: 20px auto 10px;
-    max-width: 900px;
-    font-weight: 700;
-    font-size: 16px;
-}
-
 .team-tabs {
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -103,7 +108,6 @@ h2 { text-align:center; margin-bottom:15px; }
     border-radius:14px;
     gap:40px;
     display:flex;
-    justify-content: space-between;
 }
 
 .stats-left,
@@ -122,8 +126,14 @@ h2 { text-align:center; margin-bottom:15px; }
 <body>
 
 <div class="page-header">
-    <img src="left-logo.png" class="header-logo left">
-    <img src="right-logo.png" class="header-logo right">
+    <div class="logo-container">
+        <img src="left-logo.png" class="header-logo left">
+        <div id="points-left" class="points-label"></div>
+    </div>
+    <div class="logo-container">
+        <img src="right-logo.png" class="header-logo right">
+        <div id="points-right" class="points-label"></div>
+    </div>
 </div>
 
 <nav>
@@ -135,8 +145,7 @@ h2 { text-align:center; margin-bottom:15px; }
 
 <h2>Team Statistics</h2>
 
-<div id="tabsContainer"></div>
-
+<div id="teamTabs" class="team-tabs"></div>
 <div id="statsDisplay" class="stats"></div>
 
 <script>
@@ -149,101 +158,113 @@ function parseCSV(text) {
     );
 }
 
-const tabsContainer = document.getElementById("tabsContainer");
+const teamTabs = document.getElementById("teamTabs");
 const statsDisplay = document.getElementById("statsDisplay");
 let allData = [];
-let teamsByLevel = {};
+let teamsInfo = [];
 
-// قراءة ماتشات Played
-fetch(sheetURL, {cache:"no-store"})
+fetch(teamsSheetURL)
 .then(res => res.text())
 .then(csv => {
-    allData = parseCSV(csv).slice(1);
-});
-
-// قراءة شيت الفرق وتجهيز التابات
-fetch(teamsSheetURL, {cache:"no-store"})
-.then(res => res.text())
-.then(csv => {
-    const rows = parseCSV(csv).slice(1);
-    rows.forEach(r => {
-        const teamName = r[1];
-        const level = r[5];
-        const owner = r[6];
-        const country = r[3];
-
-        if(!teamsByLevel[level]) teamsByLevel[level] = [];
-        teamsByLevel[level].push({teamName, owner, country, level});
-    });
-
-    // إنشاء التابات لكل Level
-    Object.keys(teamsByLevel).sort().forEach(level => {
-        const levelTitle = document.createElement("div");
-        levelTitle.className = "level-title";
-        levelTitle.textContent = "Level " + level;
-        tabsContainer.appendChild(levelTitle);
-
-        const levelTabs = document.createElement("div");
-        levelTabs.className = "team-tabs";
-
-        teamsByLevel[level].forEach(team => {
-            const tab = document.createElement("div");
-            tab.className = "team-tab";
-            tab.textContent = team.teamName;
-            tab.onclick = () => showTeamStats(team, tab);
-            levelTabs.appendChild(tab);
-        });
-
-        tabsContainer.appendChild(levelTabs);
-    });
+    teamsInfo = parseCSV(csv).slice(1).map(r => ({
+        teamName: r[1].trim(),
+        owner: r[6].trim(),
+        country: r[3].trim(),
+        level: r[5].trim()
+    }));
 })
 .catch(err => console.error("Teams sheet error:", err));
 
-// عرض الإحصائيات
+fetch(sheetURL)
+.then(res => res.text())
+.then(csv => {
+    allData = parseCSV(csv).slice(1);
+
+    // جلب الفرق بدون duplicates
+    const teams = new Set();
+    allData.forEach(m => {
+        const h = m[2]?.trim(), a = m[11]?.trim();
+        if(h && h.toLowerCase() !== "lose") teams.add(h);
+        if(a && a.toLowerCase() !== "lose") teams.add(a);
+    });
+
+    [...teams].forEach(team => {
+        const tab = document.createElement("div");
+        tab.className = "team-tab";
+        tab.textContent = team;
+        tab.onclick = () => showTeamStats(team, tab);
+        teamTabs.appendChild(tab);
+    });
+
+    // حساب النقاط لكل مالك وعرضها أسفل اللوجو
+    function calculateOwnerPoints(ownerName){
+        let pts = 0;
+        allData.forEach(m => {
+            if(m[15]?.trim() !== "Played") return;
+            const h = m[2], a = m[11];
+            const hs = +m[6], as = +m[7];
+            const hOwner = teamsInfo.find(t => t.teamName === h)?.owner;
+            const aOwner = teamsInfo.find(t => t.teamName === a)?.owner;
+            if(hOwner === ownerName){
+                if(hs>as) pts+=3;
+                else if(hs===as) pts+=1;
+            }
+            if(aOwner === ownerName){
+                if(as>hs) pts+=3;
+                else if(as===hs) pts+=1;
+            }
+        });
+        return pts;
+    }
+
+    document.getElementById("points-left").textContent = "Points: " + calculateOwnerPoints("Ahmed Ibrahem");
+    document.getElementById("points-right").textContent = "Points: " + calculateOwnerPoints("Abdoulrahman Atef");
+
+})
+.catch(err => console.error("Match sheet error:", err));
+
 function showTeamStats(team, tab) {
     document.querySelectorAll(".team-tab").forEach(t => t.classList.remove("active"));
-    if(tab) tab.classList.add("active");
+    tab.classList.add("active");
 
     let played=0, won=0, draw=0, lost=0, gf=0, ga=0;
 
     allData.forEach(m => {
         if(m[15]?.trim() !== "Played") return;
-        const h=m[2], a=m[11];
-        const hs=+m[6], as=+m[7];
-
-        if(h===team.teamName || a===team.teamName){
+        const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+        if(h===team || a===team){
             played++;
             if(hs===as) draw++;
-            else if((h===team.teamName && hs>as)||(a===team.teamName && as>hs)) won++;
+            else if((h===team && hs>as) || (a===team && as>hs)) won++;
             else lost++;
-
-            if(h===team.teamName){ gf+=hs; ga+=as; }
-            else { gf+=as; ga+=hs; }
+            if(h===team){ gf+=hs; ga+=as; } else { gf+=as; ga+=hs; }
         }
     });
 
     const gd = gf - ga;
     const pts = won*3 + draw;
 
-    statsDisplay.style.display="flex";
+    const info = teamsInfo.find(t => t.teamName===team) || {};
+
     statsDisplay.innerHTML = `
         <div class="stats-left">
-            <div><strong>Played:</strong> ${played}</div>
-            <div><strong>Won:</strong> ${won}</div>
-            <div><strong>Draw:</strong> ${draw}</div>
-            <div><strong>Lost:</strong> ${lost}</div>
-            <div><strong>Goals For:</strong> ${gf}</div>
-            <div><strong>Goals Against:</strong> ${ga}</div>
-            <div><strong>Goal Diff:</strong> ${gd}</div>
-            <div><strong>Points:</strong> ${pts}</div>
+            <div>Played: ${played}</div>
+            <div>Won: ${won}</div>
+            <div>Draw: ${draw}</div>
+            <div>Lost: ${lost}</div>
+            <div>Goals For: ${gf}</div>
+            <div>Goals Against: ${ga}</div>
+            <div>Goal Difference: ${gd}</div>
+            <div>Points: ${pts}</div>
         </div>
         <div class="stats-right">
-            <div><strong>Team:</strong> ${team.teamName}</div>
-            <div><strong>Owner:</strong> ${team.owner}</div>
-            <div><strong>Country:</strong> ${team.country}</div>
-            <div><strong>Level:</strong> ${team.level}</div>
+            <div><strong>Team:</strong> ${team}</div>
+            <div><strong>Owner:</strong> ${info.owner||''}</div>
+            <div><strong>Country:</strong> ${info.country||''}</div>
+            <div><strong>Level:</strong> ${info.level||''}</div>
         </div>
     `;
+    statsDisplay.style.display = "flex";
 }
 </script>
 
