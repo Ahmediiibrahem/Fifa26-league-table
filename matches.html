@@ -7,8 +7,21 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
-    /* تحسين التابات */
 
+     .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.header-logo {
+    height: 100px;   /* عدّل الحجم لو حابب */
+    object-fit: contain;
+}
+
+
+    
     /* تحسين التابات */
 nav {
     display: flex;
@@ -70,6 +83,12 @@ tr:nth-child(even) { background:#1a1a1a; }
 </style>
 </head>
 <body>
+
+     <div class="page-header">
+    <img src="left-logo.png" alt="Left Logo" class="header-logo left">
+    <img src="right-logo.png" alt="Right Logo" class="header-logo right">
+</div>
+
 
 <!-- قائمة التنقل -->
 <nav>
