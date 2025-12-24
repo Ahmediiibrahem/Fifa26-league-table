@@ -22,24 +22,22 @@ body{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:10px 20px;
+    padding:10px 30px;
 }
+
+.owner-header{
+    text-align:center;
+}
+
 .header-logo{
     height:100px;
 }
 
-/* ===== Owners Points ===== */
-.owners{
-    display:flex;
-    justify-content:space-between;
-    max-width:900px;
-    margin:10px auto 20px;
-}
-.owner-box{
-    text-align:center;
-}
-.owner-box img{
-    height:60px;
+.owner-points{
+    margin-top:6px;
+    font-size:14px;
+    font-weight:800;
+    color:#f1c40f;
 }
 
 /* ===== Navbar ===== */
@@ -56,17 +54,19 @@ nav a{
     padding:10px 25px;
     border-radius:8px;
 }
-nav a.active,nav a:hover{
+nav a.active,
+nav a:hover{
     background:#3498db;
 }
 
 /* ===== Levels ===== */
 .level{
     max-width:1100px;
-    margin:20px auto;
+    margin:25px auto;
 }
 .level h3{
-    margin-bottom:10px;
+    margin-bottom:12px;
+    color:#f1c40f;
 }
 .team-tabs{
     display:grid;
@@ -76,19 +76,21 @@ nav a.active,nav a:hover{
 .team-tab{
     background:#2b2b2b;
     padding:12px;
-    text-align:center;
     border-radius:10px;
+    text-align:center;
     cursor:pointer;
+    transition:.3s;
 }
-.team-tab:hover,.team-tab.active{
+.team-tab:hover,
+.team-tab.active{
     background:#3498db;
 }
 
-/* ===== Stats ===== */
+/* ===== Stats Box ===== */
 .stats{
     display:none;
     max-width:900px;
-    margin:30px auto;
+    margin:35px auto;
     background:rgba(0,0,0,.45);
     padding:25px;
     border-radius:14px;
@@ -97,7 +99,8 @@ nav a.active,nav a:hover{
 .stats-left,.stats-right{
     width:50%;
 }
-.stats-left div,.stats-right div{
+.stats-left div,
+.stats-right div{
     margin-bottom:8px;
 }
 </style>
@@ -105,6 +108,7 @@ nav a.active,nav a:hover{
 
 <body>
 
+<!-- ===== Header ===== -->
 <div class="page-header">
 
     <div class="owner-header">
@@ -119,7 +123,7 @@ nav a.active,nav a:hover{
 
 </div>
 
-
+<!-- ===== Navbar ===== -->
 <nav>
     <a href="index.html">Standings</a>
     <a href="matches.html">Results</a>
@@ -127,105 +131,128 @@ nav a.active,nav a:hover{
     <a href="team-stats.html" class="active">Stats</a>
 </nav>
 
+<!-- ===== Levels + Teams ===== -->
 <div id="levels"></div>
+
+<!-- ===== Stats ===== -->
 <div id="statsDisplay" class="stats"></div>
 
 <script>
-const matchesURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t="+Date.now();
-const teamsURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t="+Date.now();
+const matchesURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t="+Date.now();
 
-function parseCSV(t){
-    return t.trim().split("\n").map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,'')));
+const teamsURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv&t="+Date.now();
+
+function parseCSV(text){
+    return text.trim().split("\n").map(r =>
+        r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,''))
+    );
 }
 
-let matches=[],teams=[];
+let matches=[], teams=[];
 
 Promise.all([
-fetch(matchesURL).then(r=>r.text()),
-fetch(teamsURL).then(r=>r.text())
+    fetch(matchesURL).then(r=>r.text()),
+    fetch(teamsURL).then(r=>r.text())
 ]).then(([m,t])=>{
-matches=parseCSV(m).slice(1);
-teams=parseCSV(t).slice(1).map(r=>({
-    name:r[1],country:r[3],level:r[5],owner:r[6],rank:r[7]
-}));
+    matches=parseCSV(m).slice(1);
+    teams=parseCSV(t).slice(1).map(r=>({
+        name:r[1],
+        country:r[3],
+        level:r[5],
+        owner:r[6],
+        rank:r[7]
+    }));
 
-renderLevels();
-calcOwnerPoints();
+    renderLevels();
+    calcOwnerPoints();
 });
 
 function renderLevels(){
-const container=document.getElementById("levels");
-[1,2,3,4].forEach(l=>{
-    const div=document.createElement("div");
-    div.className="level";
-    div.innerHTML=`<h3>Level ${l}</h3><div class="team-tabs"></div>`;
-    teams.filter(t=>t.level==l).forEach(team=>{
-        const tab=document.createElement("div");
-        tab.className="team-tab";
-        tab.textContent=team.name;
-        tab.onclick=()=>showStats(team);
-        div.querySelector(".team-tabs").appendChild(tab);
+    const container=document.getElementById("levels");
+    [1,2,3,4].forEach(level=>{
+        const block=document.createElement("div");
+        block.className="level";
+        block.innerHTML=`<h3>Level ${level}</h3><div class="team-tabs"></div>`;
+
+        teams.filter(t=>t.level==level).forEach(team=>{
+            const tab=document.createElement("div");
+            tab.className="team-tab";
+            tab.textContent=team.name;
+            tab.onclick=(e)=>showStats(team,e.target);
+            block.querySelector(".team-tabs").appendChild(tab);
+        });
+
+        container.appendChild(block);
     });
-    container.appendChild(div);
-});
 }
 
-function showStats(team){
-document.querySelectorAll(".team-tab").forEach(t=>t.classList.remove("active"));
-event.target.classList.add("active");
+function showStats(team,tab){
+    document.querySelectorAll(".team-tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
 
-let p=w=d=l=gf=ga=0;
-matches.forEach(m=>{
-    if(m[15]!=="Played")return;
-    const h=m[2],a=m[11],hs=+m[6],as=+m[7];
-    if(h===team.name||a===team.name){
-        p++;
-        if(hs===as)d++;
-        else if((h===team.name&&hs>as)||(a===team.name&&as>hs))w++;
-        else l++;
-        if(h===team.name){gf+=hs;ga+=as}else{gf+=as;ga+=hs}
-    }
-});
+    let played=0,won=0,draw=0,lost=0,gf=0,ga=0;
 
-const pts=w*3+d;
-document.getElementById("statsDisplay").style.display="flex";
-document.getElementById("statsDisplay").innerHTML=`
-<div class="stats-left">
-<div>Played: ${p}</div>
-<div>Won: ${w}</div>
-<div>Draw: ${d}</div>
-<div>Lost: ${l}</div>
-<div>Goals For: ${gf}</div>
-<div>Goals Against: ${ga}</div>
-<div>Goal Difference: ${gf-ga}</div>
-<div>Points: ${pts}</div>
-</div>
-<div class="stats-right">
-<div><b>Team:</b> ${team.name}</div>
-<div><b>Owner:</b> ${team.owner}</div>
-<div><b>Country:</b> ${team.country}</div>
-<div><b>Level:</b> ${team.level}</div>
-<div><b>International Rank:</b> ${team.rank}</div>
-</div>`;
+    matches.forEach(m=>{
+        if(m[15]!=="Played")return;
+        const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+        if(h===team.name||a===team.name){
+            played++;
+            if(hs===as) draw++;
+            else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) won++;
+            else lost++;
+
+            if(h===team.name){ gf+=hs; ga+=as; }
+            else{ gf+=as; ga+=hs; }
+        }
+    });
+
+    const pts=won*3+draw;
+
+    const box=document.getElementById("statsDisplay");
+    box.style.display="flex";
+    box.innerHTML=`
+        <div class="stats-left">
+            <div>Played: ${played}</div>
+            <div>Won: ${won}</div>
+            <div>Draw: ${draw}</div>
+            <div>Lost: ${lost}</div>
+            <div>Goals For: ${gf}</div>
+            <div>Goals Against: ${ga}</div>
+            <div>Goal Difference: ${gf-ga}</div>
+            <div>Points: ${pts}</div>
+        </div>
+        <div class="stats-right">
+            <div><b>Team:</b> ${team.name}</div>
+            <div><b>Owner:</b> ${team.owner}</div>
+            <div><b>Country:</b> ${team.country}</div>
+            <div><b>Level:</b> ${team.level}</div>
+            <div><b>International Rank:</b> ${team.rank}</div>
+        </div>
+    `;
 }
 
 function calcOwnerPoints(){
-let ah=0,ab=0;
-teams.forEach(t=>{
-let pts=0;
-matches.forEach(m=>{
-if(m[15]!=="Played")return;
-const h=m[2],a=m[11],hs=+m[6],as=+m[7];
-if(h===t.name||a===t.name){
-if(hs===as)pts++;
-else if((h===t.name&&hs>as)||(a===t.name&&as>hs))pts+=3;
-}
-});
-if(t.owner==="Ahmed Ibrahem")ah+=pts;
-else ab+=pts;
-});
-document.getElementById("ahmedPts").textContent="Points: "+ah;
-document.getElementById("abdoPts").textContent="Points: "+ab;
+    let ahmed=0, abdo=0;
+
+    teams.forEach(team=>{
+        let pts=0;
+        matches.forEach(m=>{
+            if(m[15]!=="Played")return;
+            const h=m[2], a=m[11], hs=+m[6], as=+m[7];
+            if(h===team.name||a===team.name){
+                if(hs===as) pts+=1;
+                else if((h===team.name&&hs>as)||(a===team.name&&as>hs)) pts+=3;
+            }
+        });
+
+        if(team.owner==="Ahmed Ibrahem") ahmed+=pts;
+        if(team.owner==="Abdoulrahman Atef") abdo+=pts;
+    });
+
+    document.getElementById("ahmedPts").textContent="Points: "+ahmed;
+    document.getElementById("abdoPts").textContent="Points: "+abdo;
 }
 </script>
 
