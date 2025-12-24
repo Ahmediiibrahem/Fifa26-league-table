@@ -136,6 +136,9 @@ h2 { text-align:center; margin-bottom:15px; }
 const sheetURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv&t=" + Date.now();
 
+const teamsSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv";
+
+    
 function parseCSV(text) {
     return text.trim().split("\n").map(r =>
         r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,''))
@@ -213,6 +216,23 @@ function showTeamStats(team, tab) {
         </div>
     `;
 }
+
+    fetch(teamsSheetURL + "&t=" + Date.now(), { cache: "no-store" })
+  .then(res => res.text())
+  .then(csv => {
+      const rows = parseCSV(csv).slice(1);
+
+      console.log("Teams Sheet:");
+      rows.forEach(r => {
+          console.log({
+              teamName: r[1],
+              level: r[5],
+              owner: r[6]
+          });
+      });
+  })
+  .catch(err => console.error("Teams sheet error:", err));
+
 </script>
 
 </body>
