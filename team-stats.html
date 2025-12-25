@@ -121,6 +121,10 @@ nav a:hover{background:#3498db;}
     padding:18px;
     text-align:center;
     font-size:20px;
+    min-height:75px; /* لضبط نفس ارتفاع كارت التقييم */
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 /* stats grid */
@@ -146,10 +150,10 @@ nav a:hover{background:#3498db;}
 .stats-right{
     display:flex;
     flex-direction:column;
+    gap:12px;
 }
 
 .stats-right .stat-card{
-    margin-bottom:12px;
     transition:.3s;
 }
 .stats-right .stat-card:hover{
@@ -179,6 +183,24 @@ nav a:hover{background:#3498db;}
 .stats-divider{
     width:1px;
     background:#444;
+}
+
+/* small cards row for Level & Rank */
+.small-cards-row{
+    display:flex;
+    gap:10px;
+}
+.small-card{
+    flex:1;
+    background:#1e1e1e;
+    border-radius:12px;
+    padding:12px 0;
+    text-align:center;
+}
+.small-card span{
+    display:block;
+    font-size:18px;
+    margin-top:4px;
 }
 </style>
 </head>
@@ -337,10 +359,13 @@ function showStats(team,tab){
                 <span>${team.keyPos} • ${team.keyRating}</span>
             </div>
 
+            <div class="small-cards-row">
+                <div class="small-card">Level<span>${team.level}</span></div>
+                <div class="small-card">International Rank<span>${team.rank}</span></div>
+            </div>
+
             <div class="stat-card">Owner: <span>${team.owner}</span></div>
             <div class="stat-card">Country: <span>${team.country}</span></div>
-            <div class="stat-card">Level: <span>${team.level}</span></div>
-            <div class="stat-card">International Rank: <span>${team.rank}</span></div>
         </div>
     `;
 }
