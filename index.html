@@ -7,7 +7,7 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 <style>
 .page-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
-.logo-box { text-align: center; }
+.logo-box { text-align: center; cursor: pointer; }
 .header-logo { height: 100px; object-fit: contain; }
 .player-points { margin-top: 5px; font-family: 'Cairo', Arial, sans-serif; font-weight: 700; font-size: 16px; color: #fff; }
 
@@ -29,13 +29,10 @@ tr:nth-child(even) { background:#1a1a1a; }
 
 .form-box { display: flex; justify-content: center; gap: 3px; }
 .form-box div { width: 18px; height: 18px; line-height: 18px; font-size: 12px; font-weight: bold; color: #fff; border-radius: 3px; text-align: center; }
-
-/* ألوان النتائج */
 .form-W { background-color: green; }
 .form-L { background-color: red; }
 .form-D { background-color: gray; }
 
-/* --- Rules Box Styles --- */
 .rules-container { width: 90%; margin: 20px auto; font-family: 'Cairo', Arial, sans-serif; }
 .rules-toggle { width: 100%; background: #2b2b2b; color: #fff; border: none; padding: 12px 20px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease; }
 .rules-toggle:hover { background: #3498db; }
@@ -99,26 +96,20 @@ tr:nth-child(even) { background:#1a1a1a; }
 </div>
 
 <script>
-// Standings CSV
 const standingsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
-
-// Form CSV
 const formURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
 
 function parseCSV(text) {
-    return text.trim().split("\n").map(row =>
-        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, ''))
-    );
+    return text.trim().split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, '')));
 }
 
-let formData = [];
-let formHeaders = [];
+let formData = [], formHeaders = [];
 fetch(formURL + "&t=" + Date.now())
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv);
-    formHeaders = data[0].slice(1).map(h => h.trim().toLowerCase()); // أسماء الفرق
-    formData = data.slice(1).map(r => r.slice(1)); // جميع الجولات
+    formHeaders = data[0].slice(1).map(h => h.trim().toLowerCase());
+    formData = data.slice(1).map(r => r.slice(1));
 })
 .catch(err => console.error("Error loading form sheet:", err));
 
@@ -126,30 +117,29 @@ fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv);
-    const rows = data.slice(1, 18); 
+    const rows = data.slice(1, 18);
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
     const pointsByOwner = {};
 
     rows.forEach((cols, index) => {
-        if (!cols[3]) return;
-
+        if(!cols[3]) return;
         const owner = cols[11];
         const points = parseInt(cols[10]) || 0;
-        if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
+        if(!pointsByOwner[owner]) pointsByOwner[owner] = 0;
         pointsByOwner[owner] += points;
 
-        // Form لكل فريق
+        // Form
         let teamName = cols[2].trim().toLowerCase();
         let teamIndex = formHeaders.findIndex(h => h === teamName);
         let formHTML = "";
-        if (teamIndex !== -1) {
+        if(teamIndex !== -1){
             formHTML = '<div class="form-box">';
             formData.forEach(round => {
                 let res = round[teamIndex].trim().toLowerCase();
-                if (res === "win") formHTML += `<div class="form-W">W</div>`;
-                else if (res === "lost") formHTML += `<div class="form-L">L</div>`;
-                else if (res === "draw") formHTML += `<div class="form-D">D</div>`;
+                if(res === "win") formHTML += `<div class="form-W">W</div>`;
+                else if(res === "lost") formHTML += `<div class="form-L">L</div>`;
+                else if(res === "draw") formHTML += `<div class="form-D">D</div>`;
             });
             formHTML += '</div>';
         }
@@ -173,10 +163,29 @@ fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
 
     document.getElementById("left-points").textContent = `Points: ${pointsByOwner["Ahmed Ibrahem"] || 0}`;
     document.getElementById("right-points").textContent = `Points: ${pointsByOwner["Abdoulrahman Atef"] || 0}`;
+
+    // جعل اللوجو قابل للنقر للانتقال إلى player-stats.html
+    document.querySelectorAll('.header-logo').forEach((img, i) => {
+        img.addEventListener('click', () => {
+            const playerData = {
+                logo: img.src,
+                points: pointsByOwner[img.alt.includes("Left") ? "Ahmed Ibrahem" : "Abdoulrahman Atef"] || 0,
+                wins: parseInt(cols[4]) || 0,
+                draws: parseInt(cols[5]) || 0,
+                losses: parseInt(cols[6]) || 0,
+                goalsFor: parseInt(cols[8]) || 0,
+                goalsAgainst: parseInt(cols[9]) || 0,
+                matchesPlayed: parseInt(cols[3]) || 0
+            };
+            if(i === 0) localStorage.setItem("player1", JSON.stringify(playerData));
+            else localStorage.setItem("player2", JSON.stringify(playerData));
+            window.location.href = "player-stats.html";
+        });
+    });
 })
 .catch(err => console.error("Error loading standings sheet:", err));
 
-document.querySelector(".rules-toggle").addEventListener("click", function() {
+document.querySelector(".rules-toggle").addEventListener("click", function(){
     const content = document.querySelector(".rules-content");
     content.classList.toggle("open");
     const arrow = content.classList.contains("open") ? "&#9650;" : "&#9660;";
