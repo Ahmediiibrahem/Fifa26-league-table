@@ -28,11 +28,11 @@ tr:nth-child(even) { background:#1a1a1a; }
 .team { text-align:center; border-collapse: collapse; }
 
 .form-box { display: flex; justify-content: center; gap: 3px; }
-.form-box div { width: 18px; height: 18px; line-height: 18px; font-size:12px; font-weight:bold; color:#fff; text-align:center; border-radius:3px; }
+.form-box div { width: 18px; height: 18px; line-height: 18px; font-size: 12px; font-weight: bold; color: #fff; border-radius: 3px; }
 
-.form-w { background-color: #2ecc71; }
-.form-l { background-color: #e74c3c; }
-.form-d { background-color: #7f8c8d; }
+.form-W { background-color: green; }
+.form-L { background-color: red; }
+.form-D { background-color: gray; }
 
 /* --- Rules Box Styles --- */
 .rules-container { width: 90%; margin: 20px auto; font-family: 'Cairo', Arial, sans-serif; }
@@ -77,14 +77,13 @@ tr:nth-child(even) { background:#1a1a1a; }
             <th>G/S</th>
             <th>G/C</th>
             <th>Points</th>
-            <th>Form</th>
             <th>Owner</th>
+            <th>Form</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 
-<!-- --- Rules Box --- -->
 <div class="rules-container">
     <button class="rules-toggle">Rules &#9660;</button>
     <div class="rules-content">
@@ -99,7 +98,10 @@ tr:nth-child(even) { background:#1a1a1a; }
 </div>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+// Standings CSV
+const standingsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+
+// Form CSV
 const formURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
 
 function parseCSV(text) {
@@ -108,56 +110,52 @@ function parseCSV(text) {
     );
 }
 
-// --- جلب الفورم أولاً ---
-let formData = {};
-fetch(formURL + "&t=" + Date.now(), { cache:"no-store" })
+// جلب الفورم
+let formData = [];
+let formHeaders = [];
+fetch(formURL + "&t=" + Date.now())
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv);
-    const headers = data[0].slice(1); // كل أسماء الفرق من العمود الثاني فصاعداً
-    const rounds = data.slice(1); // الصفوف تمثل الجولات
-    headers.forEach((team, i) => {
-        const key = team.trim().toLowerCase();
-        formData[key] = rounds.map(row => {
-            const val = row[i+1];
-            if(val === "Win") return "W";
-            if(val === "Lost") return "L";
-            if(val === "Draw") return "D";
-            return "";
-        });
-    });
+    formHeaders = data[0].slice(1).map(h => h.trim().toLowerCase()); // أسماء الفرق
+    formData = data.slice(1).map(r => r.slice(1)); // 8 جولات
 })
 .catch(err => console.error("Error loading form sheet:", err));
 
-// --- جلب Standings ---
-fetch(sheetURL + "&t=" + Date.now(), { cache:"no-store" })
+// جلب Standings
+fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv);
-    const rows = data.slice(1, 18);
+    const rows = data.slice(1, 18); 
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
     const pointsByOwner = {};
 
     rows.forEach((cols, index) => {
-        if(!cols[3]) return;
+        if (!cols[3]) return;
+
         const owner = cols[11];
         const points = parseInt(cols[10]) || 0;
-        if(!pointsByOwner[owner]) pointsByOwner[owner] = 0;
+        if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
         pointsByOwner[owner] += points;
 
-        // فورم الفريق
-        const teamKey = cols[2].trim().toLowerCase();
-        const teamForm = formData[teamKey] || [];
-        let formHTML = '';
-        teamForm.forEach(f => {
-            let cls = f==='W'?'form-w': f==='L'?'form-l':'form-d';
-            formHTML += `<div class="${cls}">${f}</div>`;
-        });
+        // Form لكل فريق
+        let teamName = cols[2].trim().toLowerCase();
+        let teamIndex = formHeaders.findIndex(h => h === teamName);
+        let formHTML = "";
+        if (teamIndex !== -1) {
+            formData.forEach(round => {
+                let res = round[teamIndex].trim().toLowerCase();
+                if (res === "win") formHTML += `<div class="form-box"><div class="form-W">W</div></div>`;
+                else if (res === "lost") formHTML += `<div class="form-box"><div class="form-L">L</div></div>`;
+                else if (res === "draw") formHTML += `<div class="form-box"><div class="form-D">D</div></div>`;
+            });
+        }
 
         tbody.innerHTML += `
         <tr>
-            <td class="rank">${index+1}</td>
+            <td class="rank">${index + 1}</td>
             <td class="team">${cols[2]}</td>
             <td>${cols[3]}</td>
             <td>${cols[4]}</td>
@@ -167,8 +165,8 @@ fetch(sheetURL + "&t=" + Date.now(), { cache:"no-store" })
             <td>${cols[8]}</td>
             <td>${cols[9]}</td>
             <td>${cols[10]}</td>
-            <td class="form-box">${formHTML}</td>
             <td>${cols[11]}</td>
+            <td>${formHTML}</td>
         </tr>`;
     });
 
@@ -177,13 +175,13 @@ fetch(sheetURL + "&t=" + Date.now(), { cache:"no-store" })
 })
 .catch(err => console.error("Error loading standings sheet:", err));
 
-// --- Rules toggle ---
-document.querySelector(".rules-toggle").addEventListener("click", function(){
+document.querySelector(".rules-toggle").addEventListener("click", function() {
     const content = document.querySelector(".rules-content");
     content.classList.toggle("open");
     const arrow = content.classList.contains("open") ? "&#9650;" : "&#9660;";
     this.innerHTML = `Rules ${arrow}`;
 });
 </script>
+
 </body>
 </html>
