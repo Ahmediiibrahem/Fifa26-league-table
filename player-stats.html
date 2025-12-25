@@ -16,7 +16,7 @@ body {
     padding: 0;
 }
 
-h2 { text-align:center; margin:30px 0 20px 0; font-weight:800; }
+h2 { text-align:center; margin:30px 0 30px 0; font-weight:800; }
 
 .stats-container {
     display: flex;
@@ -39,23 +39,29 @@ h2 { text-align:center; margin:30px 0 20px 0; font-weight:800; }
     margin-bottom: 20px;
 }
 
-.stats-cards {
+/* تصميم منطقة الاحصائيات */
+.stats-table {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+    text-align: center;
+    margin-top: 20px;
 }
 
-.stats-card {
-    background: #1a1a1a;
-    padding: 10px 15px;
-    border-radius: 10px;
+.stat-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
     font-weight: 600;
-    min-width: 180px;
 }
 
-.stats-card span { font-weight: 800; color: #3498db; }
+.stat-label {
+    min-width: 150px;
+}
+
+.stat-left { color: red; font-weight: 700; }
+.stat-right { color: #3498db; font-weight: 700; }
 
 </style>
 </head>
@@ -64,15 +70,17 @@ h2 { text-align:center; margin:30px 0 20px 0; font-weight:800; }
 <h2>Player Comparison</h2>
 
 <div class="stats-container">
-    <div class="player-box" id="leftPlayerBox">
+    <div class="player-box">
         <img src="left-logo.png" alt="Ahmed Ibrahem">
-        <div class="stats-cards" id="leftPlayerStats"></div>
     </div>
 
-    <div class="player-box" id="rightPlayerBox">
+    <div class="player-box">
         <img src="right-logo.png" alt="Abdoulrahman Atef">
-        <div class="stats-cards" id="rightPlayerStats"></div>
     </div>
+</div>
+
+<div class="stats-table" id="statsTable">
+    <!-- سيتم تعبئة الإحصائيات هنا -->
 </div>
 
 <script>
@@ -102,25 +110,38 @@ function computePlayerStats(data, playerName) {
     return stats;
 }
 
-function displayPlayerStats(containerId, playerName, stats) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = `
-        <div class="stats-card"><span>Matches Played</span><span>${stats.matches}</span></div>
-        <div class="stats-card"><span>Total Points</span><span>${stats.points}</span></div>
-        <div class="stats-card"><span>Wins</span><span>${stats.W}</span></div>
-        <div class="stats-card"><span>Draws</span><span>${stats.D}</span></div>
-        <div class="stats-card"><span>Losses</span><span>${stats.L}</span></div>
-        <div class="stats-card"><span>Goals Scored</span><span>${stats.GF}</span></div>
-        <div class="stats-card"><span>Goals Conceded</span><span>${stats.GC}</span></div>
-    `;
+function displayStats(leftStats, rightStats) {
+    const container = document.getElementById("statsTable");
+    const statNames = [
+        {label:"Matches Played", key:"matches"},
+        {label:"Total Points", key:"points"},
+        {label:"Wins", key:"W"},
+        {label:"Draws", key:"D"},
+        {label:"Losses", key:"L"},
+        {label:"Goals Scored", key:"GF"},
+        {label:"Goals Conceded", key:"GC"}
+    ];
+
+    container.innerHTML = "";
+    statNames.forEach(stat => {
+        const row = document.createElement("div");
+        row.className = "stat-row";
+        row.innerHTML = `
+            <div class="stat-left">${leftStats[stat.key]}</div>
+            <div class="stat-label">${stat.label}</div>
+            <div class="stat-right">${rightStats[stat.key]}</div>
+        `;
+        container.appendChild(row);
+    });
 }
 
 fetch(standingsURL + "&t=" + Date.now(), {cache:"no-store"})
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv).slice(1,18);
-    displayPlayerStats("leftPlayerStats", "Ahmed Ibrahem", computePlayerStats(data, "Ahmed Ibrahem"));
-    displayPlayerStats("rightPlayerStats", "Abdoulrahman Atef", computePlayerStats(data, "Abdoulrahman Atef"));
+    const leftStats = computePlayerStats(data, "Ahmed Ibrahem");
+    const rightStats = computePlayerStats(data, "Abdoulrahman Atef");
+    displayStats(leftStats, rightStats);
 })
 .catch(err => console.error("Error loading sheet:", err));
 </script>
