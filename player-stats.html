@@ -2,143 +2,103 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Player Comparison</title>
+<title>Player Stats</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 body {
-    font-family:'Cairo', Arial, sans-serif;
+    font-family: 'Cairo', Arial, sans-serif;
     background: linear-gradient(rgba(15,15,15,0.85), rgba(15,15,15,0.85)), url("standings-bg.jpg");
     background-size: cover;
     color: #fff;
-    font-weight:700;
+    font-weight: 700;
+    margin: 0;
+    padding: 20px;
     text-align: center;
 }
-.container {
+.logos-container {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
     gap: 80px;
-    margin-top: 50px;
+    margin-bottom: 40px;
 }
 .player-box {
-    background: rgba(43, 43, 43, 0.9);
-    padding: 20px;
-    border-radius: 15px;
-    width: 300px;
+    text-align: center;
 }
 .player-box img {
     width: 150px;
     height: 150px;
     object-fit: contain;
+    border: 3px solid #fff;
+    border-radius: 10px;
+    margin-bottom: 15px;
 }
-.player-box h3 {
-    margin: 15px 0 10px;
+.stats-table {
+    width: 300px;
+    margin: 0 auto 30px;
+    border-collapse: collapse;
 }
-.stats {
-    text-align: left;
-    margin-top: 10px;
+.stats-table th, .stats-table td {
+    border: 1px solid #fff;
+    padding: 8px;
+    font-weight: 700;
 }
-.stats p {
-    margin: 5px 0;
+.stats-table th {
+    background: #2b2b2b;
 }
 </style>
 </head>
 <body>
 
-<h1>Player Comparison</h1>
+<h2>Player Comparison</h2>
 
-<div class="container">
-    <div class="player-box" id="player1">
-        <img src="left-logo.png" alt="Player 1 Logo">
-        <h3>Ahmed Ibrahem</h3>
-        <div class="stats" id="stats1">
-            <p>Matches Played: 0</p>
-            <p>Points: 0</p>
-            <p>Wins: 0</p>
-            <p>Draws: 0</p>
-            <p>Losses: 0</p>
-            <p>Goals Scored: 0</p>
-            <p>Goals Conceded: 0</p>
-        </div>
+<div class="logos-container">
+    <div class="player-box" id="player1-box">
+        <img id="player1-logo" src="" alt="Player 1 Logo">
+        <table class="stats-table" id="player1-stats">
+            <tr><th>Stat</th><th>Value</th></tr>
+        </table>
     </div>
-
-    <div class="player-box" id="player2">
-        <img src="right-logo.png" alt="Player 2 Logo">
-        <h3>Abdoulrahman Atef</h3>
-        <div class="stats" id="stats2">
-            <p>Matches Played: 0</p>
-            <p>Points: 0</p>
-            <p>Wins: 0</p>
-            <p>Draws: 0</p>
-            <p>Losses: 0</p>
-            <p>Goals Scored: 0</p>
-            <p>Goals Conceded: 0</p>
-        </div>
+    <div class="player-box" id="player2-box">
+        <img id="player2-logo" src="" alt="Player 2 Logo">
+        <table class="stats-table" id="player2-stats">
+            <tr><th>Stat</th><th>Value</th></tr>
+        </table>
     </div>
 </div>
 
 <script>
-// هنا هنجيب البيانات من الشيت ونحسب كل الإحصائيات لكل لاعب
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+// جلب البيانات من LocalStorage بعد الضغط على لوجو في Standings
+const player1 = JSON.parse(localStorage.getItem("player1"));
+const player2 = JSON.parse(localStorage.getItem("player2"));
 
-function parseCSV(text) {
-    return text.trim().split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, '')));
+// ضبط اللوجوهات
+document.getElementById("player1-logo").src = player1?.logo || "";
+document.getElementById("player2-logo").src = player2?.logo || "";
+
+// عرض الإحصائيات
+function fillStats(tableId, stats) {
+    const table = document.getElementById(tableId);
+    Object.entries(stats).forEach(([key, value]) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${key}</td><td>${value}</td>`;
+        table.appendChild(row);
+    });
 }
 
-fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
-.then(res => res.text())
-.then(csv => {
-    const data = parseCSV(csv).slice(1, 18); // الصفوف 1-17
-    const stats = {
-        "Ahmed Ibrahem": {matches:0, points:0, wins:0, draws:0, losses:0, gs:0, gc:0},
-        "Abdoulrahman Atef": {matches:0, points:0, wins:0, draws:0, losses:0, gs:0, gc:0}
-    };
+// بيانات افتراضية للإحصائيات
+const defaultStats = stats => ({
+    "Matches Played": stats.matchesPlayed || 0,
+    "Points": stats.points || 0,
+    "Wins": stats.wins || 0,
+    "Draws": stats.draws || 0,
+    "Losses": stats.losses || 0,
+    "Goals Scored": stats.goalsFor || 0,
+    "Goals Conceded": stats.goalsAgainst || 0
+});
 
-    data.forEach(row => {
-        const owner = row[11];
-        if(!stats[owner]) return;
-
-        const played = parseInt(row[3]) || 0;
-        const wins = parseInt(row[4]) || 0;
-        const draws = parseInt(row[5]) || 0;
-        const losses = parseInt(row[6]) || 0;
-        const gs = parseInt(row[8]) || 0;
-        const gc = parseInt(row[9]) || 0;
-        const points = parseInt(row[10]) || 0;
-
-        stats[owner].matches += played;
-        stats[owner].wins += wins;
-        stats[owner].draws += draws;
-        stats[owner].losses += losses;
-        stats[owner].gs += gs;
-        stats[owner].gc += gc;
-        stats[owner].points += points;
-    });
-
-    // عرض الإحصائيات
-    const stats1Div = document.getElementById("stats1");
-    const stats2Div = document.getElementById("stats2");
-
-    stats1Div.innerHTML = `
-        <p>Matches Played: ${stats["Ahmed Ibrahem"].matches}</p>
-        <p>Points: ${stats["Ahmed Ibrahem"].points}</p>
-        <p>Wins: ${stats["Ahmed Ibrahem"].wins}</p>
-        <p>Draws: ${stats["Ahmed Ibrahem"].draws}</p>
-        <p>Losses: ${stats["Ahmed Ibrahem"].losses}</p>
-        <p>Goals Scored: ${stats["Ahmed Ibrahem"].gs}</p>
-        <p>Goals Conceded: ${stats["Ahmed Ibrahem"].gc}</p>
-    `;
-    stats2Div.innerHTML = `
-        <p>Matches Played: ${stats["Abdoulrahman Atef"].matches}</p>
-        <p>Points: ${stats["Abdoulrahman Atef"].points}</p>
-        <p>Wins: ${stats["Abdoulrahman Atef"].wins}</p>
-        <p>Draws: ${stats["Abdoulrahman Atef"].draws}</p>
-        <p>Losses: ${stats["Abdoulrahman Atef"].losses}</p>
-        <p>Goals Scored: ${stats["Abdoulrahman Atef"].gs}</p>
-        <p>Goals Conceded: ${stats["Abdoulrahman Atef"].gc}</p>
-    `;
-})
-.catch(err => console.error("Error loading sheet:", err));
+// تعبئة الجدول لكل لاعب
+fillStats("player1-stats", defaultStats(player1));
+fillStats("player2-stats", defaultStats(player2));
 </script>
 
 </body>
