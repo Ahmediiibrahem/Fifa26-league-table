@@ -54,28 +54,36 @@ tr:nth-child(even) { background:#1a1a1a; }
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv";
 
 function parseCSV(text) {
-    return text.trim().split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, '')));
+    return text.trim().split("\n").map(row => 
+        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, ''))
+    );
 }
 
 fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
 .then(res => res.text())
 .then(csv => {
-    const allData = parseCSV(csv).slice(1);
+    const allData = parseCSV(csv).slice(1); // تجاهل الهيدر
     const tbody = document.getElementById("resultsBody");
     tbody.innerHTML = "";
     let matchCount = 0;
 
     allData.forEach(match => {
-        // تعديل الأعمدة حسب الشيت الجديد
-        if(!match[1] || !match[2] || !match[6] || !match[7] || !match[11]) return;
+        // الأعمدة الصحيحة بناءً على الشيت الجديد:
+        const matchID = match[0];       // أو العمود اللي يمثل ID إذا موجود
+        const homeTeam = match[1];
+        const homeScore = match[2];
+        const awayScore = match[3];
+        const awayTeam = match[4];
+
+        if(!homeTeam || !homeScore || !awayScore || !awayTeam) return;
 
         tbody.innerHTML += `
         <tr>
-            <td>${match[1]}</td>
-            <td>${match[2]}</td>
-            <td>${match[6]}</td>
-            <td>${match[7]}</td>
-            <td>${match[11]}</td>
+            <td>${matchID || matchCount+1}</td>
+            <td>${homeTeam}</td>
+            <td>${homeScore}</td>
+            <td>${awayScore}</td>
+            <td>${awayTeam}</td>
         </tr>`;
 
         matchCount++;
