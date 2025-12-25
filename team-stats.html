@@ -5,7 +5,6 @@
 <title>Team Stats</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
 body{
@@ -17,7 +16,7 @@ body{
     font-weight:700;
 }
 
-/* Header */
+/* HEADER */
 .page-header{
     display:flex;
     justify-content:space-between;
@@ -26,14 +25,9 @@ body{
 }
 .owner-header{text-align:center;}
 .header-logo{height:100px;}
-.owner-points{
-    margin-top:6px;
-    font-size:14px;
-    font-weight:800;
-    color:#fff;
-}
+.owner-points{margin-top:6px;font-size:14px;font-weight:800}
 
-/* Navbar */
+/* NAV */
 nav{
     display:flex;
     justify-content:center;
@@ -50,15 +44,9 @@ nav a{
 nav a.active,
 nav a:hover{background:#3498db;}
 
-/* Levels */
-.level{
-    max-width:1100px;
-    margin:25px auto;
-}
-.level h3{
-    margin-bottom:12px;
-    color:#fff;
-}
+/* LEVELS */
+.level{max-width:1100px;margin:25px auto;}
+.level h3{margin-bottom:12px;}
 .team-tabs{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -83,7 +71,7 @@ nav a:hover{background:#3498db;}
     background:#fff;
     border-radius:3px;
     transform:translateX(-50%);
-    transition:width .3s ease;
+    transition:.3s;
 }
 .team-tab.active::after{width:40%;}
 .team-tab:hover,
@@ -105,10 +93,10 @@ nav a:hover{background:#3498db;}
     font-weight:800;
 }
 
-/* Stats */
+/* STATS */
 .stats{
     display:none;
-    max-width:950px;
+    max-width:1000px;
     margin:35px auto;
     background:rgba(0,0,0,.45);
     padding:30px;
@@ -119,12 +107,27 @@ nav a:hover{background:#3498db;}
 
 .stats-left,.stats-right{width:50%;}
 
-/* LEFT — centered & bigger */
+/* LEFT */
 .stats-left{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+/* team name card */
+.team-name-card{
+    background:#1e1e1e;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    font-size:20px;
+}
+
+/* stats grid */
+.stats-grid{
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:18px;
-    align-content:center;
 }
 
 .stat-card{
@@ -133,26 +136,19 @@ nav a:hover{background:#3498db;}
     padding:22px 10px;
     text-align:center;
 }
-
 .stat-card span{
     display:block;
-    font-size:32px;
-    font-weight:800;
+    font-size:30px;
     margin-top:6px;
-    color:#fff;
 }
 
-/* Right side */
+/* RIGHT */
 .stats-right{
     display:flex;
     flex-direction:column;
 }
 
 .stats-right .stat-card{
-    background:#1e1e1e;
-    border-radius:12px;
-    padding:14px;
-    text-align:center;
     margin-bottom:12px;
     transition:.3s;
 }
@@ -161,15 +157,9 @@ nav a:hover{background:#3498db;}
     box-shadow:0 6px 12px rgba(0,0,0,.4);
 }
 
-.stats-divider{
-    width:1px;
-    background:#444;
-}
-
-/* Rating row */
+/* rating row */
 .rating-row{
     display:flex;
-    justify-content:space-between;
     gap:10px;
 }
 .rating-item{
@@ -177,12 +167,18 @@ nav a:hover{background:#3498db;}
     background:#252525;
     border-radius:10px;
     padding:10px 0;
-    font-size:14px;
+    text-align:center;
 }
 .rating-item span{
     display:block;
     font-size:22px;
     margin-top:4px;
+}
+
+/* divider */
+.stats-divider{
+    width:1px;
+    background:#444;
 }
 </style>
 </head>
@@ -216,7 +212,7 @@ const teamsURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOY
 
 function parseCSV(t){
     return t.trim().split("\n").map(r =>
-        r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,''))
+        r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,''))
     );
 }
 
@@ -238,6 +234,9 @@ Promise.all([
             rank:r[7],
             att, mid, def,
             avr:Math.round((att+mid+def)/3),
+            keyPlayer:r[11],
+            keyRating:r[12],
+            keyPos:r[13],
             points:0
         };
     });
@@ -266,21 +265,21 @@ function renderLevels(){
     const c=document.getElementById("levels");
     c.innerHTML="";
     [1,2,3,4].forEach(l=>{
-        const b=document.createElement("div");
-        b.className="level";
-        b.innerHTML=`<h3>Level ${l}</h3><div class="team-tabs"></div>`;
+        const block=document.createElement("div");
+        block.className="level";
+        block.innerHTML=`<h3>Level ${l}</h3><div class="team-tabs"></div>`;
 
         teams.filter(t=>t.level==l)
-        .sort((a,b)=>b.points-a.points)
-        .forEach(team=>{
-            const tab=document.createElement("div");
-            tab.className="team-tab";
-            tab.innerHTML=`${team.name}<div class="team-points">${team.points}</div>`;
-            tab.onclick=e=>showStats(team,e.currentTarget);
-            b.querySelector(".team-tabs").appendChild(tab);
-        });
+            .sort((a,b)=>b.points-a.points)
+            .forEach(team=>{
+                const tab=document.createElement("div");
+                tab.className="team-tab";
+                tab.innerHTML=`${team.name}<div class="team-points">${team.points}</div>`;
+                tab.onclick=e=>showStats(team,e.currentTarget);
+                block.querySelector(".team-tabs").appendChild(tab);
+            });
 
-        c.appendChild(b);
+        c.appendChild(block);
     });
 }
 
@@ -293,36 +292,37 @@ function showStats(team,tab){
     matches.forEach(m=>{
         if(m[15]?.trim()!=="Played") return;
         const h=m[2],a=m[11],hs=+m[6]||0,as=+m[7]||0;
-
         if(h===team.name||a===team.name){
             p++;
             if(hs===as)d++;
             else if((h===team.name&&hs>as)||(a===team.name&&as>hs))w++;
             else l++;
-
             if(h===team.name){gf+=hs;ga+=as}else{gf+=as;ga+=hs}
         }
     });
 
     const pts=w*3+d;
 
+    document.getElementById("statsDisplay").style.display="flex";
     document.getElementById("statsDisplay").innerHTML=`
         <div class="stats-left">
-            <div class="stat-card">Played<span>${p}</span></div>
-            <div class="stat-card">Won<span>${w}</span></div>
-            <div class="stat-card">Draw<span>${d}</span></div>
-            <div class="stat-card">Lost<span>${l}</span></div>
-            <div class="stat-card">Goals For<span>${gf}</span></div>
-            <div class="stat-card">Goals Against<span>${ga}</span></div>
-            <div class="stat-card">Goal Diff<span>${gf-ga}</span></div>
-            <div class="stat-card">Points<span>${pts}</span></div>
+            <div class="team-name-card">${team.name}</div>
+
+            <div class="stats-grid">
+                <div class="stat-card">Played<span>${p}</span></div>
+                <div class="stat-card">Won<span>${w}</span></div>
+                <div class="stat-card">Draw<span>${d}</span></div>
+                <div class="stat-card">Lost<span>${l}</span></div>
+                <div class="stat-card">Goals For<span>${gf}</span></div>
+                <div class="stat-card">Goals Against<span>${ga}</span></div>
+                <div class="stat-card">Goal Diff<span>${gf-ga}</span></div>
+                <div class="stat-card">Points<span>${pts}</span></div>
+            </div>
         </div>
 
         <div class="stats-divider"></div>
 
         <div class="stats-right">
-            <div class="stat-card">Team: <span>${team.name}</span></div>
-
             <div class="stat-card">
                 <div class="rating-row">
                     <div class="rating-item">ATT<span>${team.att}</span></div>
@@ -332,14 +332,17 @@ function showStats(team,tab){
                 </div>
             </div>
 
+            <div class="stat-card">
+                ⭐ ${team.keyPlayer}<br>
+                <span>${team.keyPos} • ${team.keyRating}</span>
+            </div>
+
             <div class="stat-card">Owner: <span>${team.owner}</span></div>
             <div class="stat-card">Country: <span>${team.country}</span></div>
             <div class="stat-card">Level: <span>${team.level}</span></div>
             <div class="stat-card">International Rank: <span>${team.rank}</span></div>
         </div>
     `;
-
-    document.getElementById("statsDisplay").style.display="flex";
 }
 
 function calcOwnerPoints(){
