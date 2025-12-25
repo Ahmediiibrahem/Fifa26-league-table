@@ -7,178 +7,37 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-}
+.page-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+.logo-box { text-align: center; }
+.header-logo { height: 100px; object-fit: contain; }
+.player-points { margin-top: 5px; font-family: 'Cairo', Arial, sans-serif; font-weight: 700; font-size: 16px; color: #fff; }
 
-.logo-box {
-    text-align: center;
-}
+nav { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+nav a { text-decoration: none; color: #fff; font-weight: 700; padding: 10px 25px; border-radius: 8px; transition: all 0.3s ease; background: #2b2b2b; }
+nav a:hover { background: #3498db; color: #fff; transform: scale(1.05); }
+nav a.active { background: #3498db; color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
 
-.header-logo {
-    height: 100px;
-    object-fit: contain;
-}
+body { font-family:'Cairo', Arial, sans-serif; color:#fff; font-weight:700; background: linear-gradient(rgba(15, 15, 15, 0.85), rgba(15, 15, 15, 0.85)), url("standings-bg.jpg"); background-size: cover; background-position: center; background-attachment: fixed; }
 
-.player-points {
-    margin-top: 5px;
-    font-family: 'Cairo', Arial, sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    color: #fff;
-}
+h2 { text-align:center; margin-bottom:15px; font-family: 'Cairo', Arial, sans-serif; font-weight: 800; }
 
-/* تحسين التابات */
-nav {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 20px;
-}
+table { width: 100%; border-collapse: collapse; font-size:14px; font-family: 'Cairo', Arial, sans-serif; font-weight: 700; }
+th { background:#2b2b2b; padding:10px; font-weight: 800; }
+td { padding:8px; text-align:center; font-weight: 700; }
+tr:nth-child(even) { background:#1a1a1a; }
+.rank { background:#3a3a3a; font-weight:bold; }
+.team { text-align:center; border-collapse: collapse; }
 
-nav a {
-    text-decoration: none;
-    color: #fff;
-    font-weight: 700;
-    padding: 10px 25px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    background: #2b2b2b;
-}
+.form-result { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; margin: 0 2px; border-radius: 4px; font-weight: 700; color: #fff; font-size: 12px; }
+.form-result.W { background: #27ae60; }
+.form-result.L { background: #e74c3c; }
+.form-result.D { background: #7f8c8d; }
 
-nav a:hover {
-    background: #3498db;
-    color: #fff;
-    transform: scale(1.05);
-}
-
-nav a.active {
-    background: #3498db;
-    color: #fff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-
-body {
-    font-family:'Cairo', Arial, sans-serif;
-    color:#fff;
-    font-weight:700;
-    background:
-        linear-gradient(
-            rgba(15, 15, 15, 0.85),
-            rgba(15, 15, 15, 0.85)
-        ),
-        url("standings-bg.jpg");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
-
-h2 {
-    text-align:center;
-    margin-bottom:15px;
-    font-family: 'Cairo', Arial, sans-serif;
-    font-weight: 800;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size:14px;
-    font-family: 'Cairo', Arial, sans-serif;
-    font-weight: 700;
-}
-
-th {
-    background:#2b2b2b;
-    padding:10px;
-    font-weight: 800;
-}
-
-td {
-    padding:8px;
-    text-align:center;
-    font-weight: 700;
-}
-
-tr:nth-child(even) {
-    background:#1a1a1a;
-}
-
-.rank {
-    background:#3a3a3a;
-    font-weight:bold;
-}
-
-.team {
-    text-align:center;
-    border-collapse: collapse;
-}
-
-/* --- Form Column --- */
-.form-result {
-    display: inline-block;
-    width: 22px;
-    height: 22px;
-    line-height: 22px;
-    text-align: center;
-    margin: 0 2px;
-    border-radius: 4px;
-    font-weight: 700;
-    color: #fff;
-    font-size: 12px;
-}
-
-.form-result.W { background: #27ae60; } /* أخضر للفوز */
-.form-result.L { background: #e74c3c; } /* أحمر للخسارة */
-.form-result.D { background: #7f8c8d; } /* رصاصي للتعادل */
-
-/* --- Rules Box Styles --- */
-.rules-container {
-    width: 90%;
-    margin: 20px auto;
-    font-family: 'Cairo', Arial, sans-serif;
-}
-
-.rules-toggle {
-    width: 100%;
-    background: #2b2b2b;
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    font-size: 16px;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.3s ease;
-}
-
-.rules-toggle:hover {
-    background: #3498db;
-}
-
-.rules-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease, padding 0.5s ease;
-    background: #1a1a1a;
-    padding: 0 20px;
-    border-radius: 8px;
-    margin-top: 5px;
-    font-weight: 600;
-}
-
-.rules-content.open {
-    max-height: 500px;
-    padding: 15px 20px;
-}
-
+.rules-container { width: 90%; margin: 20px auto; font-family: 'Cairo', Arial, sans-serif; }
+.rules-toggle { width: 100%; background: #2b2b2b; color: #fff; border: none; padding: 12px 20px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease; }
+.rules-toggle:hover { background: #3498db; }
+.rules-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease, padding 0.5s ease; background: #1a1a1a; padding: 0 20px; border-radius: 8px; margin-top: 5px; font-weight: 600; }
+.rules-content.open { max-height: 500px; padding: 15px 20px; }
 </style>
 </head>
 
@@ -224,7 +83,6 @@ tr:nth-child(even) {
     <tbody></tbody>
 </table>
 
-<!-- --- Rules Box --- -->
 <div class="rules-container">
     <button class="rules-toggle">Rules &#9660;</button>
     <div class="rules-content">
@@ -239,7 +97,8 @@ tr:nth-child(even) {
 </div>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+const rankingSheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+const matchesSheet = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv";
 
 function parseCSV(text) {
     const rows = text.trim().split("\n");
@@ -249,52 +108,73 @@ function parseCSV(text) {
     );
 }
 
-fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
+// جلب نتائج المباريات أولاً
+fetch(matchesSheet + "&t=" + Date.now(), { cache: "no-store" })
 .then(res => res.text())
 .then(csv => {
-    const data = parseCSV(csv);
-    const rows = data.slice(1, 18); // نعرض من الصف 1 لحد 17
-    const tbody = document.querySelector("tbody");
-    tbody.innerHTML = "";
+    const matches = parseCSV(csv);
+    // تجاهل الهيدر
+    const matchRows = matches.slice(1);
 
-    const pointsByOwner = {}; // لتجميع النقاط حسب اللاعب
+    // إنشاء خريطة نتائج لكل فريق
+    const teamResults = {};
 
-    rows.forEach((cols, index) => {
-        if (!cols[3]) return;
+    matchRows.forEach(row => {
+        const home = row[0], homeScore = parseInt(row[1]), awayScore = parseInt(row[2]), away = row[3];
+        if (!teamResults[home]) teamResults[home] = [];
+        if (!teamResults[away]) teamResults[away] = [];
 
-        const owner = cols[11];
-        const points = parseInt(cols[10]) || 0;
-        if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
-        pointsByOwner[owner] += points;
-
-        // العمود 12 يحتوي آخر 5 نتائج للفريق مثل "W,L,D,W,W"
-        const last5 = cols[12] ? cols[12].split(",") : [];
-        const formHTML = last5.map(r => `<span class="form-result ${r}">${r}</span>`).join("");
-
-        tbody.innerHTML += `
-        <tr>
-            <td class="rank">${index + 1}</td>
-            <td class="team">${cols[2]}</td>
-            <td>${cols[3]}</td>
-            <td>${cols[4]}</td>
-            <td>${cols[5]}</td>
-            <td>${cols[6]}</td>
-            <td>${cols[7]}</td>
-            <td>${cols[8]}</td>
-            <td>${cols[9]}</td>
-            <td>${cols[10]}</td>
-            <td>${cols[11]}</td>
-            <td>${formHTML}</td>
-        </tr>`;
+        if (homeScore > awayScore) { teamResults[home].push('W'); teamResults[away].push('L'); }
+        else if (homeScore < awayScore) { teamResults[home].push('L'); teamResults[away].push('W'); }
+        else { teamResults[home].push('D'); teamResults[away].push('D'); }
     });
 
-    // عرض النقاط تحت كل لوجو
-    document.getElementById("left-points").textContent = `Points: ${pointsByOwner["Ahmed Ibrahem"] || 0}`;
-    document.getElementById("right-points").textContent = `Points: ${pointsByOwner["Abdoulrahman Atef"] || 0}`;
-})
-.catch(err => console.error("Error loading sheet:", err));
+    // بعد كده نجيب بيانات الترتيب
+    fetch(rankingSheet + "&t=" + Date.now(), { cache: "no-store" })
+    .then(res => res.text())
+    .then(csv2 => {
+        const rankingData = parseCSV(csv2);
+        const rows = rankingData.slice(1, 18);
+        const tbody = document.querySelector("tbody");
+        tbody.innerHTML = "";
+        const pointsByOwner = {};
 
-// --- Rules toggle animation ---
+        rows.forEach((cols, index) => {
+            if (!cols[3]) return;
+            const owner = cols[11];
+            const points = parseInt(cols[10]) || 0;
+            if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
+            pointsByOwner[owner] += points;
+
+            const team = cols[2];
+            const last5 = teamResults[team] ? teamResults[team].slice(-5) : [];
+            const formHTML = last5.map(r => `<span class="form-result ${r}">${r}</span>`).join("");
+
+            tbody.innerHTML += `
+            <tr>
+                <td class="rank">${index + 1}</td>
+                <td class="team">${team}</td>
+                <td>${cols[3]}</td>
+                <td>${cols[4]}</td>
+                <td>${cols[5]}</td>
+                <td>${cols[6]}</td>
+                <td>${cols[7]}</td>
+                <td>${cols[8]}</td>
+                <td>${cols[9]}</td>
+                <td>${cols[10]}</td>
+                <td>${owner}</td>
+                <td>${formHTML}</td>
+            </tr>`;
+        });
+
+        document.getElementById("left-points").textContent = `Points: ${pointsByOwner["Ahmed Ibrahem"] || 0}`;
+        document.getElementById("right-points").textContent = `Points: ${pointsByOwner["Abdoulrahman Atef"] || 0}`;
+    })
+    .catch(err => console.error("Error loading ranking sheet:", err));
+})
+.catch(err => console.error("Error loading matches sheet:", err));
+
+// --- Rules toggle ---
 document.querySelector(".rules-toggle").addEventListener("click", function() {
     const content = document.querySelector(".rules-content");
     content.classList.toggle("open");
