@@ -2,103 +2,114 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Player Stats</title>
+<title>Player Stats Comparison</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 <style>
 body {
-    font-family: 'Cairo', Arial, sans-serif;
+    font-family:'Cairo', Arial, sans-serif;
     background: linear-gradient(rgba(15,15,15,0.85), rgba(15,15,15,0.85)), url("standings-bg.jpg");
     background-size: cover;
+    background-position: center;
     color: #fff;
-    font-weight: 700;
     margin: 0;
-    padding: 20px;
-    text-align: center;
+    padding: 0;
 }
-.logos-container {
-    display: flex;
-    justify-content: center;
-    gap: 80px;
-    margin-bottom: 40px;
-}
-.player-box {
-    text-align: center;
-}
-.player-box img {
-    width: 150px;
-    height: 150px;
-    object-fit: contain;
-    border: 3px solid #fff;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
-.stats-table {
-    width: 300px;
-    margin: 0 auto 30px;
-    border-collapse: collapse;
-}
-.stats-table th, .stats-table td {
-    border: 1px solid #fff;
-    padding: 8px;
-    font-weight: 700;
-}
-.stats-table th {
-    background: #2b2b2b;
-}
+
+.page-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+.header-logo { height: 120px; cursor: pointer; object-fit: contain; transition: transform 0.2s ease; }
+.header-logo:hover { transform: scale(1.05); }
+
+nav { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+nav a { text-decoration: none; color: #fff; font-weight: 700; padding: 10px 25px; border-radius: 8px; transition: all 0.3s ease; background: #2b2b2b; }
+nav a:hover { background: #3498db; color: #fff; transform: scale(1.05); }
+nav a.active { background: #3498db; color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+
+.stats-container { display: flex; justify-content: center; align-items: flex-start; gap: 50px; margin: 30px auto; flex-wrap: wrap; }
+.player-box { text-align: center; }
+.player-box img { width: 150px; height: 150px; border-radius: 15px; border: 3px solid #fff; margin-bottom: 15px; }
+.stats-card { background: #1a1a1a; padding: 15px 20px; margin: 5px 0; border-radius: 10px; text-align: left; font-weight: 600; }
+.stats-card span { float: right; font-weight: 800; color: #3498db; }
+
+h2 { text-align:center; margin-bottom:20px; font-weight:800; }
+
 </style>
 </head>
 <body>
 
+<div class="page-header">
+    <img src="left-logo.png" alt="Left Player" id="leftLogo" class="header-logo">
+    <img src="right-logo.png" alt="Right Player" id="rightLogo" class="header-logo">
+</div>
+
+<nav>
+  <a href="index.html">Standings</a>
+  <a href="matches.html">Results</a>
+  <a href="upcoming.html">Upcoming</a>
+  <a href="team-stats.html" class="active">Stats</a>
+</nav>
+
 <h2>Player Comparison</h2>
 
-<div class="logos-container">
-    <div class="player-box" id="player1-box">
-        <img id="player1-logo" src="" alt="Player 1 Logo">
-        <table class="stats-table" id="player1-stats">
-            <tr><th>Stat</th><th>Value</th></tr>
-        </table>
+<div class="stats-container">
+    <div class="player-box" id="leftPlayerStats">
+        <!-- Stats for left player will go here -->
     </div>
-    <div class="player-box" id="player2-box">
-        <img id="player2-logo" src="" alt="Player 2 Logo">
-        <table class="stats-table" id="player2-stats">
-            <tr><th>Stat</th><th>Value</th></tr>
-        </table>
+    <div class="player-box" id="rightPlayerStats">
+        <!-- Stats for right player will go here -->
     </div>
 </div>
 
 <script>
-// جلب البيانات من LocalStorage بعد الضغط على لوجو في Standings
-const player1 = JSON.parse(localStorage.getItem("player1"));
-const player2 = JSON.parse(localStorage.getItem("player2"));
+// رابط شيت Standings
+const standingsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
 
-// ضبط اللوجوهات
-document.getElementById("player1-logo").src = player1?.logo || "";
-document.getElementById("player2-logo").src = player2?.logo || "";
-
-// عرض الإحصائيات
-function fillStats(tableId, stats) {
-    const table = document.getElementById(tableId);
-    Object.entries(stats).forEach(([key, value]) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${key}</td><td>${value}</td>`;
-        table.appendChild(row);
-    });
+function parseCSV(text) {
+    return text.trim().split("\n").map(row =>
+        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, ''))
+    );
 }
 
-// بيانات افتراضية للإحصائيات
-const defaultStats = stats => ({
-    "Matches Played": stats.matchesPlayed || 0,
-    "Points": stats.points || 0,
-    "Wins": stats.wins || 0,
-    "Draws": stats.draws || 0,
-    "Losses": stats.losses || 0,
-    "Goals Scored": stats.goalsFor || 0,
-    "Goals Conceded": stats.goalsAgainst || 0
-});
+// الدالة اللي تحسب إحصائيات لاعب بناء على الفرق المملوكة
+function computePlayerStats(data, playerName) {
+    const stats = {matches:0, points:0, W:0, D:0, L:0, GF:0, GC:0};
+    data.forEach(row => {
+        const owner = row[11].trim();
+        if(owner === playerName) {
+            const matches = parseInt(row[3]) || 0;
+            stats.matches += matches;
+            stats.points += parseInt(row[10]) || 0;
+            stats.W += parseInt(row[4]) || 0;
+            stats.D += parseInt(row[5]) || 0;
+            stats.L += parseInt(row[6]) || 0;
+            stats.GF += parseInt(row[8]) || 0;
+            stats.GC += parseInt(row[9]) || 0;
+        }
+    });
+    return stats;
+}
 
-// تعبئة الجدول لكل لاعب
-fillStats("player1-stats", defaultStats(player1));
-fillStats("player2-stats", defaultStats(player2));
+// عرض الإحصائيات في كروت
+function displayPlayerStats(containerId, playerName, stats) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = `<h3>${playerName}</h3>
+        <div class="stats-card">Matches Played <span>${stats.matches}</span></div>
+        <div class="stats-card">Total Points <span>${stats.points}</span></div>
+        <div class="stats-card">Wins <span>${stats.W}</span></div>
+        <div class="stats-card">Draws <span>${stats.D}</span></div>
+        <div class="stats-card">Losses <span>${stats.L}</span></div>
+        <div class="stats-card">Goals Scored <span>${stats.GF}</span></div>
+        <div class="stats-card">Goals Conceded <span>${stats.GC}</span></div>`;
+}
+
+fetch(standingsURL + "&t=" + Date.now(), {cache:"no-store"})
+.then(res => res.text())
+.then(csv => {
+    const data = parseCSV(csv).slice(1,18); // الصفوف 1-17
+    displayPlayerStats("leftPlayerStats", "Ahmed Ibrahem", computePlayerStats(data, "Ahmed Ibrahem"));
+    displayPlayerStats("rightPlayerStats", "Abdoulrahman Atef", computePlayerStats(data, "Abdoulrahman Atef"));
+})
+.catch(err => console.error("Error loading sheet:", err));
 </script>
 
 </body>
