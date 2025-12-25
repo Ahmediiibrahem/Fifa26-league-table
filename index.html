@@ -27,6 +27,15 @@ tr:nth-child(even) { background:#1a1a1a; }
 .rank { background:#3a3a3a; font-weight:bold; }
 .team { text-align:center; border-collapse: collapse; }
 
+/* --- Form Styles --- */
+.form-cell { display: flex; justify-content: center; gap: 2px; }
+.form-cell span { display: inline-block; padding: 3px 6px; font-weight: 700; border-radius: 4px; color: #fff; font-size: 12px; }
+
+/* Colors for results */
+.win { background-color: #27ae60; }   /* أخضر */
+.loss { background-color: #c0392b; }  /* أحمر */
+.draw { background-color: #7f8c8d; }   /* رمادي */
+
 /* --- Rules Box Styles --- */
 .rules-container { width: 90%; margin: 20px auto; font-family: 'Cairo', Arial, sans-serif; }
 .rules-toggle { width: 100%; background: #2b2b2b; color: #fff; border: none; padding: 12px 20px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease; }
@@ -71,6 +80,7 @@ tr:nth-child(even) { background:#1a1a1a; }
             <th>G/C</th>
             <th>Points</th>
             <th>Owner</th>
+            <th>Form</th>
         </tr>
     </thead>
     <tbody></tbody>
@@ -91,8 +101,11 @@ tr:nth-child(even) { background:#1a1a1a; }
 </div>
 
 <script>
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+// URLs for CSVs
+const standingsCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+const formCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
 
+// Parse CSV
 function parseCSV(text) {
     const rows = text.trim().split("\n");
     return rows.map(row =>
@@ -101,11 +114,26 @@ function parseCSV(text) {
     );
 }
 
-fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
+// Load Form CSV first
+let formData = {};
+fetch(formCSV + "&t=" + Date.now(), { cache: "no-store" })
 .then(res => res.text())
 .then(csv => {
     const data = parseCSV(csv);
-    const rows = data.slice(1, 18); // نعرض من الصف 1 لحد 17
+    const headers = data[0].slice(1); // أسماء الفرق
+    const rounds = data.slice(1); // باقي الصفوف
+    headers.forEach((team, colIndex) => {
+        formData[team] = rounds.map(row => row[colIndex + 1]); // جميع الجولات لكل فريق
+    });
+})
+.catch(err => console.error("Error loading form sheet:", err));
+
+// Load Standings CSV
+fetch(standingsCSV + "&t=" + Date.now(), { cache: "no-store" })
+.then(res => res.text())
+.then(csv => {
+    const data = parseCSV(csv);
+    const rows = data.slice(1, 18);
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
     const pointsByOwner = {};
@@ -116,6 +144,17 @@ fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
         const points = parseInt(cols[10]) || 0;
         if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
         pointsByOwner[owner] += points;
+
+        // Form HTML
+        let formHTML = "";
+        const teamForm = formData[cols[2]] || [];
+        teamForm.forEach(result => {
+            let cls = "";
+            if (result === "W") cls = "win";
+            else if (result === "L") cls = "loss";
+            else if (result === "D") cls = "draw";
+            formHTML += `<span class="${cls}">${result}</span>`;
+        });
 
         tbody.innerHTML += `
         <tr>
@@ -130,14 +169,14 @@ fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
             <td>${cols[9]}</td>
             <td>${cols[10]}</td>
             <td>${cols[11]}</td>
+            <td class="form-cell">${formHTML}</td>
         </tr>`;
     });
 
-    // عرض النقاط تحت كل لوجو
     document.getElementById("left-points").textContent = `Points: ${pointsByOwner["Ahmed Ibrahem"] || 0}`;
     document.getElementById("right-points").textContent = `Points: ${pointsByOwner["Abdoulrahman Atef"] || 0}`;
 })
-.catch(err => console.error("Error loading sheet:", err));
+.catch(err => console.error("Error loading standings sheet:", err));
 
 // --- Rules toggle animation ---
 document.querySelector(".rules-toggle").addEventListener("click", function() {
