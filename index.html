@@ -7,7 +7,6 @@
 <link rel="icon" type="image/jpeg" href="fifa26.jpeg">
 
 <style>
-
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -118,6 +117,24 @@ tr:nth-child(even) {
     border-collapse: collapse;
 }
 
+/* --- Form Column --- */
+.form-result {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-weight: 700;
+    color: #fff;
+    font-size: 12px;
+}
+
+.form-result.W { background: #27ae60; } /* أخضر للفوز */
+.form-result.L { background: #e74c3c; } /* أحمر للخسارة */
+.form-result.D { background: #7f8c8d; } /* رصاصي للتعادل */
+
 /* --- Rules Box Styles --- */
 .rules-container {
     width: 90%;
@@ -201,6 +218,7 @@ tr:nth-child(even) {
             <th>G/C</th>
             <th>Points</th>
             <th>Owner</th>
+            <th>Form</th>
         </tr>
     </thead>
     <tbody></tbody>
@@ -249,6 +267,10 @@ fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
         if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
         pointsByOwner[owner] += points;
 
+        // العمود 12 يحتوي آخر 5 نتائج للفريق مثل "W,L,D,W,W"
+        const last5 = cols[12] ? cols[12].split(",") : [];
+        const formHTML = last5.map(r => `<span class="form-result ${r}">${r}</span>`).join("");
+
         tbody.innerHTML += `
         <tr>
             <td class="rank">${index + 1}</td>
@@ -262,6 +284,7 @@ fetch(sheetURL + "&t=" + Date.now(), { cache: "no-store" })
             <td>${cols[9]}</td>
             <td>${cols[10]}</td>
             <td>${cols[11]}</td>
+            <td>${formHTML}</td>
         </tr>`;
     });
 
