@@ -9,154 +9,199 @@
 <style>
 
     .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-}
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+    }
 
-.header-logo {
-    height: 100px;   /* عدّل الحجم لو حابب */
-    object-fit: contain;
-}
-
+    .header-logo {
+        height: 100px;   /* عدّل الحجم لو حابب */
+        object-fit: contain;
+    }
 
     /* تحسين التابات */
-nav {
-    display: flex;
-    justify-content: center; /* توسيط التابات */
-    gap: 20px; /* مسافة بين التابات */
-    margin-bottom: 20px;
-}
+    nav {
+        display: flex;
+        justify-content: center; /* توسيط التابات */
+        gap: 20px; /* مسافة بين التابات */
+        margin-bottom: 20px;
+    }
 
-nav a {
-    text-decoration: none;
-    color: #fff; /* لون النص */
-    font-weight: 700;
-    padding: 10px 25px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    background: #2b2b2b; /* خلفية التاب */
-}
+    nav a {
+        text-decoration: none;
+        color: #fff; /* لون النص */
+        font-weight: 700;
+        padding: 10px 25px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: #2b2b2b; /* خلفية التاب */
+    }
 
-nav a:hover {
-    background: #3498db; /* خلفية عند المرور بالفأرة */
-    color: #fff;
-    transform: scale(1.05); /* تكبير خفيف عند hover */
-}
+    nav a:hover {
+        background: #3498db; /* خلفية عند المرور بالفأرة */
+        color: #fff;
+        transform: scale(1.05); /* تكبير خفيف عند hover */
+    }
 
-nav a.active {
-    background: #3498db; /* لون التاب النشط */
-    color: #fff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
+    nav a.active {
+        background: #3498db; /* لون التاب النشط */
+        color: #fff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
 
-    
-body {
-    font-family:'Cairo', Arial, sans-serif;
-    color:#fff;
-    font-weight:700;
+    body {
+        font-family:'Cairo', Arial, sans-serif;
+        color:#fff;
+        font-weight:700;
+        background:
+            linear-gradient(
+                rgba(15, 15, 15, 0.85),
+                rgba(15, 15, 15, 0.85)
+            ),
+            url("standings-bg.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
 
-    background:
-        linear-gradient(
-            rgba(15, 15, 15, 0.85),
-            rgba(15, 15, 15, 0.85)
-        ),
-        url("standings-bg.jpg");
+    h2 {
+        text-align:center;
+        margin-bottom:15px;
+        font-family: 'Cairo', Arial, sans-serif; /* خط Cairo */
+        font-weight: 800; /* Bold أكثر */
+    }
 
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size:14px;
+        font-family: 'Cairo', Arial, sans-serif; /* خط Cairo */
+        font-weight: 700; /* Bold */
+    }
 
+    th {
+        background:#2b2b2b;
+        padding:10px;
+        font-weight: 800; /* Bold أكثر لرؤوس الأعمدة */
+    }
 
-h2 {
-    text-align:center;
-    margin-bottom:15px;
-    font-family: 'Cairo', Arial, sans-serif; /* خط Cairo */
-    font-weight: 800; /* Bold أكثر */
+    td {
+        padding:8px;
+        text-align:center;
+        font-weight: 700; /* Bold للنصوص داخل الخلايا */
+    }
 
-}
+    tr:nth-child(even) {
+        background:#1a1a1a;
+    }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size:14px;
-    font-family: 'Cairo', Arial, sans-serif; /* خط Cairo */
-    font-weight: 700; /* Bold */
-}
+    .rank {
+        background:#3a3a3a;
+        font-weight:bold;
+    }
 
-th {
-    background:#2b2b2b;
-    padding:10px;
-    font-weight: 800; /* Bold أكثر لرؤوس الأعمدة */
+    .team {
+        text-align:center;
+        border-collapse: collapse;
+    }
 
-}
+    /* --- Rules Box Styles --- */
+    .rules-container {
+        width: 90%;
+        margin: 20px auto;
+        font-family: 'Cairo', Arial, sans-serif;
+    }
 
-td {
-    padding:8px;
-    text-align:center;
-    font-weight: 700; /* Bold للنصوص داخل الخلايا */
-}
+    .rules-toggle {
+        width: 100%;
+        background: #2b2b2b;
+        color: #fff;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.3s ease;
+    }
 
-tr:nth-child(even) {
-    background:#1a1a1a;
-}
+    .rules-toggle:hover {
+        background: #3498db;
+    }
 
-.rank {
-    background:#3a3a3a;
-    font-weight:bold;
-}
+    .rules-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+        background: #1a1a1a;
+        padding: 0 20px;
+        border-radius: 8px;
+        margin-top: 5px;
+        font-weight: 600;
+    }
 
-.team {
-    text-align:center;
-    border-collapse: collapse;
-    
-}
+    .rules-content.open {
+        max-height: 500px; /* ارتفاع تقديري لتظهر المحتويات */
+        padding: 15px 20px;
+    }
+
 </style>
 </head>
 
 <body>
 
     <div class="page-header">
-    <img src="left-logo.png" alt="Left Logo" class="header-logo left">
-    <img src="right-logo.png" alt="Right Logo" class="header-logo right">
-</div>
+        <img src="left-logo.png" alt="Left Logo" class="header-logo left">
+        <img src="right-logo.png" alt="Right Logo" class="header-logo right">
+    </div>
 
-
-    
     <nav>
-  <a href="index.html" class="active">Standings</a>
-  <a href="matches.html">Results</a>
-  <a href="upcoming.html">Upcoming</a>
-  <a href="team-stats.html">Stats</a>
-        
-</nav>
+        <a href="index.html" class="active">Standings</a>
+        <a href="matches.html">Results</a>
+        <a href="upcoming.html">Upcoming</a>
+        <a href="team-stats.html">Stats</a>
+    </nav>
 
+    <h2>League Table</h2>
 
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>P</th>
+                <th>W</th>
+                <th>D</th>
+                <th>L</th>
+                <th>DIFF</th>
+                <th>G/S</th>
+                <th>G/C</th>
+                <th>Points</th>
+                <th>Owner</th>
+            </tr>
+        </thead>
 
+        <tbody></tbody>
+    </table>
 
-<h2>League Table</h2>
-
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Team</th>
-<th>P</th>
-<th>W</th>
-<th>D</th>
-<th>L</th>
-<th>DIFF</th>
-<th>G/S</th>
-<th>G/C</th>
-<th>Points</th>
-<th>Owner</th>
-</tr>
-</thead>
-
-<tbody></tbody>
-</table>
+    <!-- --- Rules Box --- -->
+    <div class="rules-container">
+        <button class="rules-toggle">Rules &#9660;</button>
+        <div class="rules-content">
+            <p>In the event that two (or more) teams finish with an equal number of points, the following rules break the tie:</p>
+            <ol>
+                <li>Points total</li>
+                <li>Goal difference</li>
+                <li>G/S</li>
+                <li>G/C</li>
+            </ol>
+        </div>
+    </div>
 
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
@@ -177,8 +222,7 @@ fetch(sheetURL + "&t=" + Date.now(), {
 .then(csv => {
     const data = parseCSV(csv);
 
-    // نعرض من الصف 1 لحد 17 (بعد الهيدر)
-    const rows = data.slice(1, 18);
+    const rows = data.slice(1, 18); // نعرض من الصف 1 لحد 17
 
     const tbody = document.querySelector("tbody");
     tbody.innerHTML = "";
@@ -189,21 +233,28 @@ fetch(sheetURL + "&t=" + Date.now(), {
         tbody.innerHTML += `
         <tr>
             <td class="rank">${index + 1}</td>
-            <td class="team">${cols[2]}</td>   <!-- العمود C -->
-            <td>${cols[3]}</td>                <!-- العمود D -->
-            <td>${cols[4]}</td>                <!-- العمود E -->
-            <td>${cols[5]}</td>                <!-- العمود F -->
-            <td>${cols[6]}</td>                <!-- العمود G -->
-            <td>${cols[7]}</td>                <!-- العمود H -->
-            <td>${cols[8]}</td>                <!-- العمود I -->
-            <td>${cols[9]}</td>                <!-- العمود J -->
-            <td>${cols[10]}</td>               <!-- العمود K -->
-            <td>${cols[11]}</td>               <!-- العمود L -->
+            <td class="team">${cols[2]}</td>
+            <td>${cols[3]}</td>
+            <td>${cols[4]}</td>
+            <td>${cols[5]}</td>
+            <td>${cols[6]}</td>
+            <td>${cols[7]}</td>
+            <td>${cols[8]}</td>
+            <td>${cols[9]}</td>
+            <td>${cols[10]}</td>
+            <td>${cols[11]}</td>
         </tr>`;
-
     });
 })
 .catch(err => console.error("Error loading sheet:", err));
+
+// --- Rules toggle animation ---
+document.querySelector(".rules-toggle").addEventListener("click", function() {
+    const content = document.querySelector(".rules-content");
+    content.classList.toggle("open");
+    const arrow = content.classList.contains("open") ? "&#9650;" : "&#9660;";
+    this.innerHTML = `Rules ${arrow}`;
+});
 </script>
 
 </body>
