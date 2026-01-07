@@ -49,12 +49,22 @@ tr:nth-child(even){background:#1a1a1a}
   background:rgba(58,58,58,.6);
 }
 
-/* ===== TEAM NAME ===== */
+/* ===== TEAM NAME (only this is left aligned) ===== */
 .team-name{
   text-align:left;
   padding-left:10px;
   white-space:nowrap;
 }
+
+/* Make logo/name feel clickable */
+.team-click{
+  cursor:pointer;
+}
+.team-click:hover{
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+.logo-col img{cursor:pointer}
 
 /* ===== TEAM LOGOS ===== */
 .team-logo{
@@ -91,6 +101,133 @@ tr:nth-child(even){background:#1a1a1a}
   background:#1a1a1a;padding:0 20px;border-radius:8px
 }
 .rules-content.open{max-height:500px;padding:15px 20px}
+
+/* ===== TEAM MODAL ===== */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:18px;
+}
+.modal.open{display:flex;}
+
+.modal-card{
+  width:min(980px, 100%);
+  background:rgba(20,20,20,.95);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
+  overflow:hidden;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  background:rgba(43,43,43,.9);
+}
+.modal-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:900;
+  font-size:18px;
+}
+.modal-title img{
+  width:34px;height:34px;object-fit:contain;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
+}
+.modal-close{
+  border:none;
+  background:#3498db;
+  color:#fff;
+  font-weight:900;
+  border-radius:10px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+.modal-close:hover{filter:brightness(1.05);}
+
+.modal-body{
+  padding:16px;
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:16px;
+}
+@media (max-width: 820px){
+  .modal-body{grid-template-columns:1fr;}
+}
+
+.box{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  padding:14px;
+}
+.box h3{
+  margin:0 0 10px 0;
+  font-size:16px;
+  font-weight:900;
+  opacity:.95;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:10px;
+}
+@media (max-width: 520px){
+  .stats-grid{grid-template-columns:repeat(2, 1fr);}
+}
+.stat{
+  background:rgba(30,30,30,.85);
+  border-radius:12px;
+  padding:10px 8px;
+  text-align:center;
+  border:1px solid rgba(255,255,255,.08);
+}
+.stat .label{font-size:12px;opacity:.85;font-weight:700;}
+.stat .val{font-size:18px;font-weight:900;margin-top:4px;}
+
+.meta-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px;
+}
+.meta{
+  background:rgba(30,30,30,.85);
+  border-radius:12px;
+  padding:10px 10px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.meta .k{font-size:12px;opacity:.85;font-weight:700;}
+.meta .v{font-size:14px;font-weight:900;margin-top:4px;word-break:break-word;}
+
+.rating-row{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:10px;
+}
+.rating{
+  background:rgba(30,30,30,.85);
+  border-radius:12px;
+  padding:10px 8px;
+  text-align:center;
+  border:1px solid rgba(255,255,255,.08);
+}
+.rating .k{font-size:12px;opacity:.85;font-weight:700;}
+.rating .v{font-size:18px;font-weight:900;margin-top:4px;}
+
+.note{
+  font-size:12px;
+  opacity:.85;
+  margin-top:10px;
+  line-height:1.35;
+}
 </style>
 </head>
 
@@ -98,11 +235,11 @@ tr:nth-child(even){background:#1a1a1a}
 
 <div class="page-header">
   <div class="logo-box">
-    <img src="left-logo.png" class="header-logo left">
+    <img src="left-logo.png" class="header-logo left" alt="Left Logo">
     <div class="player-points" id="left-points">Points: 0</div>
   </div>
   <div class="logo-box">
-    <img src="right-logo.png" class="header-logo right">
+    <img src="right-logo.png" class="header-logo right" alt="Right Logo">
     <div class="player-points" id="right-points">Points: 0</div>
   </div>
 </div>
@@ -138,35 +275,88 @@ tr:nth-child(even){background:#1a1a1a}
 </table>
 
 <div class="rules-container">
-<button class="rules-toggle">Rules ▼</button>
-<div class="rules-content">
-  <ol>
-    <li>Points</li>
-    <li>Goal Difference</li>
-    <li>Goals Scored</li>
-    <li>Goals Conceded</li>
-  </ol>
+  <button class="rules-toggle">Rules ▼</button>
+  <div class="rules-content">
+    <ol>
+      <li>Points</li>
+      <li>Goal Difference</li>
+      <li>Goals Scored</li>
+      <li>Goals Conceded</li>
+    </ol>
+  </div>
 </div>
+
+<!-- ===== TEAM STATS MODAL ===== -->
+<div id="teamModal" class="modal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title">
+        <img id="modalLogo" src="" alt="Team Logo" onerror="this.style.display='none'">
+        <span id="modalTeamName">Team</span>
+      </div>
+      <button id="modalClose" class="modal-close">Close ✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="box">
+        <h3>Match Stats</h3>
+        <div class="stats-grid">
+          <div class="stat"><div class="label">Played</div><div class="val" id="mP">0</div></div>
+          <div class="stat"><div class="label">Won</div><div class="val" id="mW">0</div></div>
+          <div class="stat"><div class="label">Draw</div><div class="val" id="mD">0</div></div>
+          <div class="stat"><div class="label">Lost</div><div class="val" id="mL">0</div></div>
+
+          <div class="stat"><div class="label">Goals For</div><div class="val" id="mGF">0</div></div>
+          <div class="stat"><div class="label">Goals Against</div><div class="val" id="mGA">0</div></div>
+          <div class="stat"><div class="label">Goal Diff</div><div class="val" id="mGD">0</div></div>
+          <div class="stat"><div class="label">Points</div><div class="val" id="mPTS">0</div></div>
+        </div>
+        <div class="note">Stats calculated from Matches sheet (Played only).</div>
+      </div>
+
+      <div class="box">
+        <h3>Team Info</h3>
+        <div class="rating-row">
+          <div class="rating"><div class="k">ATT</div><div class="v" id="tATT">-</div></div>
+          <div class="rating"><div class="k">MID</div><div class="v" id="tMID">-</div></div>
+          <div class="rating"><div class="k">DEF</div><div class="v" id="tDEF">-</div></div>
+          <div class="rating"><div class="k">AVR</div><div class="v" id="tAVR">-</div></div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="meta-grid">
+          <div class="meta"><div class="k">Owner</div><div class="v" id="tOwner">-</div></div>
+          <div class="meta"><div class="k">Country</div><div class="v" id="tCountry">-</div></div>
+          <div class="meta"><div class="k">Level</div><div class="v" id="tLevel">-</div></div>
+          <div class="meta"><div class="k">International Rank</div><div class="v" id="tRank">-</div></div>
+          <div class="meta" style="grid-column:1/-1"><div class="k">Key Player</div><div class="v" id="tKey">-</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 const standingsURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
-
 const formURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
+
+/* From your team-stats page */
+const matchesURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv";
+const teamsURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv";
 
 function parseCSV(t){
   return t.trim().split("\n").map(r =>
     r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,"").trim())
   );
 }
-
 function teamLogoSrc(name){
   return `logos/${encodeURIComponent(name)}.png`;
 }
-
-/* ✅ يدعم: W / Win / Won — L / Lost / Loss — D / Draw */
 function normalizeResult(value){
   const v = String(value || "").trim().toLowerCase();
   if(!v) return "";
@@ -176,16 +366,155 @@ function normalizeResult(value){
   return "";
 }
 
-/* ===== LOAD FORM + STANDINGS TOGETHER (FIXED + NO CACHE) ===== */
+/* ===== DATA STORES ===== */
+let teamInfoByName = {};   // from Teams sheet
+let matchStatsByTeam = {}; // calculated from Matches sheet
+
+function buildTeamInfo(teamsCSV){
+  const rows = parseCSV(teamsCSV).slice(1);
+  teamInfoByName = {};
+  rows.forEach(r=>{
+    // Based on your team-stats code:
+    // name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7],
+    // att:r[8], mid:r[9], def:r[10], keyPlayer:r[11], keyRating:r[12], keyPos:r[13]
+    const name = (r[1] || "").trim();
+    if(!name) return;
+
+    const att = +r[8] || 0;
+    const mid = +r[9] || 0;
+    const def = +r[10] || 0;
+    const avr = Math.round((att + mid + def) / 3);
+
+    teamInfoByName[name] = {
+      name,
+      country: r[3] || "-",
+      level: r[5] || "-",
+      owner: r[6] || "-",
+      rank: r[7] || "-",
+      att, mid, def, avr,
+      keyPlayer: r[11] || "-",
+      keyRating: r[12] || "-",
+      keyPos: r[13] || "-"
+    };
+  });
+}
+
+function buildMatchStats(matchesCSV){
+  const rows = parseCSV(matchesCSV).slice(1);
+  matchStatsByTeam = {};
+
+  function ensure(team){
+    if(!matchStatsByTeam[team]){
+      matchStatsByTeam[team] = { P:0,W:0,D:0,L:0,GF:0,GA:0,PTS:0 };
+    }
+    return matchStatsByTeam[team];
+  }
+
+  rows.forEach(m=>{
+    // Based on your team-stats code:
+    // h=m[2], a=m[11], hs=+m[6], as=+m[7], status=m[15]
+    const status = (m[15] || "").trim();
+    if(status !== "Played") return;
+
+    const h = (m[2] || "").trim();
+    const a = (m[11] || "").trim();
+    const hs = +m[6] || 0;
+    const as = +m[7] || 0;
+    if(!h || !a) return;
+
+    const home = ensure(h);
+    const away = ensure(a);
+
+    home.P++; away.P++;
+    home.GF += hs; home.GA += as;
+    away.GF += as; away.GA += hs;
+
+    if(hs === as){
+      home.D++; away.D++;
+      home.PTS += 1; away.PTS += 1;
+    } else if(hs > as){
+      home.W++; away.L++;
+      home.PTS += 3;
+    } else {
+      away.W++; home.L++;
+      away.PTS += 3;
+    }
+  });
+}
+
+function openTeamModal(teamName){
+  const modal = document.getElementById("teamModal");
+  const info = teamInfoByName[teamName] || null;
+  const st = matchStatsByTeam[teamName] || { P:0,W:0,D:0,L:0,GF:0,GA:0,PTS:0 };
+
+  document.getElementById("modalTeamName").textContent = teamName;
+
+  const logo = document.getElementById("modalLogo");
+  logo.style.display = "";
+  logo.src = teamLogoSrc(teamName);
+  logo.alt = teamName;
+
+  // Match stats
+  document.getElementById("mP").textContent = st.P;
+  document.getElementById("mW").textContent = st.W;
+  document.getElementById("mD").textContent = st.D;
+  document.getElementById("mL").textContent = st.L;
+  document.getElementById("mGF").textContent = st.GF;
+  document.getElementById("mGA").textContent = st.GA;
+  document.getElementById("mGD").textContent = (st.GF - st.GA);
+  document.getElementById("mPTS").textContent = st.PTS;
+
+  // Team info
+  document.getElementById("tATT").textContent = info ? info.att : "-";
+  document.getElementById("tMID").textContent = info ? info.mid : "-";
+  document.getElementById("tDEF").textContent = info ? info.def : "-";
+  document.getElementById("tAVR").textContent = info ? info.avr : "-";
+
+  document.getElementById("tOwner").textContent = info ? info.owner : "-";
+  document.getElementById("tCountry").textContent = info ? info.country : "-";
+  document.getElementById("tLevel").textContent = info ? info.level : "-";
+  document.getElementById("tRank").textContent = info ? info.rank : "-";
+  document.getElementById("tKey").textContent = info
+    ? `⭐ ${info.keyPlayer} (${info.keyPos} • ${info.keyRating})`
+    : "-";
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+}
+
+function closeTeamModal(){
+  const modal = document.getElementById("teamModal");
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden","true");
+}
+
+/* Close handlers */
+document.getElementById("modalClose").addEventListener("click", closeTeamModal);
+document.getElementById("teamModal").addEventListener("click", (e)=>{
+  if(e.target.id === "teamModal") closeTeamModal();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closeTeamModal();
+});
+
+/* ===== LOAD EVERYTHING TOGETHER (Stable) ===== */
 Promise.all([
   fetch(formURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
-  fetch(standingsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text())
-]).then(([formCSV, standingsCSV])=>{
+  fetch(standingsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
+  fetch(matchesURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
+  fetch(teamsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text())
+]).then(([formCSV, standingsCSV, matchesCSV, teamsCSV])=>{
 
+  // Build extra sources for the modal
+  buildTeamInfo(teamsCSV);
+  buildMatchStats(matchesCSV);
+
+  // Form sheet
   const formParsed = parseCSV(formCSV);
   const formHeaders = (formParsed[0] || []).slice(1).map(h=>h.trim().toLowerCase());
   const formData = formParsed.slice(1).map(r=>r.slice(1));
 
+  // Standings table
   const rows = parseCSV(standingsCSV).slice(1,18);
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
@@ -206,23 +535,22 @@ Promise.all([
       i===1 ? "logo-2" :
       i===2 ? "logo-3" : "logo-rest";
 
-    // ===== FORM =====
+    // FORM
     let idx = formHeaders.indexOf(team.toLowerCase());
     let formHTML = "";
-
-    if(idx > -1){
-      formHTML = '<div class="form-box">';
+    if(idx>-1){
+      formHTML='<div class="form-box">';
       formData.forEach(r=>{
         const res = normalizeResult(r[idx]);
-        if(res === "W") formHTML += '<div class="form-W">W</div>';
-        else if(res === "L") formHTML += '<div class="form-L">L</div>';
-        else if(res === "D") formHTML += '<div class="form-D">D</div>';
+        if(res==="W") formHTML+='<div class="form-W">W</div>';
+        else if(res==="L") formHTML+='<div class="form-L">L</div>';
+        else if(res==="D") formHTML+='<div class="form-D">D</div>';
       });
-      formHTML += '</div>';
+      formHTML+='</div>';
     }
 
     tbody.innerHTML += `
-    <tr>
+    <tr data-team="${team}">
       <td class="rank">${i+1}</td>
       <td class="logo-col">
         <img class="team-logo ${logoClass}"
@@ -230,7 +558,7 @@ Promise.all([
              alt="${team}"
              onerror="this.style.display='none'">
       </td>
-      <td class="team-name">${team}</td>
+      <td class="team-name team-click">${team}</td>
       <td>${c[3]}</td>
       <td>${c[4]}</td>
       <td>${c[5]}</td>
@@ -248,12 +576,24 @@ Promise.all([
     "Points: " + (pointsByOwner["Ahmed Ibrahem"]||0);
   document.getElementById("right-points").textContent =
     "Points: " + (pointsByOwner["Abdoulrahman Atef"]||0);
-})
-.catch(err => console.error("Error loading sheets:", err));
 
-document.querySelector(".rules-toggle").onclick=()=>{
-  document.querySelector(".rules-content").classList.toggle("open");
-};
+  // Click handlers for teams (logo OR name)
+  tbody.querySelectorAll("tr[data-team]").forEach(tr=>{
+    const teamName = tr.getAttribute("data-team");
+    const logoTd = tr.children[1]; // logo col
+    const nameTd = tr.querySelector(".team-name");
+    logoTd.addEventListener("click", ()=> openTeamModal(teamName));
+    nameTd.addEventListener("click", ()=> openTeamModal(teamName));
+  });
+
+}).catch(err => console.error("Error loading sheets:", err));
+
+/* Rules toggle */
+document.querySelector(".rules-toggle").addEventListener("click", function() {
+  const content = document.querySelector(".rules-content");
+  content.classList.toggle("open");
+  this.innerHTML = content.classList.contains("open") ? "Rules ▲" : "Rules ▼";
+});
 </script>
 
 </body>
