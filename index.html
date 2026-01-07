@@ -56,21 +56,13 @@ tr:nth-child(even){background:#1a1a1a}
   white-space:nowrap;
 }
 
-/* Make logo/name feel clickable */
-.team-click{
-  cursor:pointer;
-}
-.team-click:hover{
-  text-decoration:underline;
-  text-underline-offset:4px;
-}
+/* clickable */
+.team-click{cursor:pointer;}
+.team-click:hover{text-decoration:underline;text-underline-offset:4px;}
 .logo-col img{cursor:pointer}
 
 /* ===== TEAM LOGOS ===== */
-.team-logo{
-  object-fit:contain;
-  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
-}
+.team-logo{object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
 .logo-1{width:34px;height:34px;}
 .logo-2{width:30px;height:30px;}
 .logo-3{width:28px;height:28px;}
@@ -234,6 +226,10 @@ tr:nth-child(even){background:#1a1a1a}
   opacity:.9;
   margin-bottom:8px;
   text-align:left;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
 .scorers-list{
   display:flex;
@@ -250,12 +246,22 @@ tr:nth-child(even){background:#1a1a1a}
   padding:8px 10px;
   border-radius:12px;
 }
+.scorer-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
 .scorer-name{
   font-weight:900;
   text-align:left;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
+}
+.scorer-badge{
+  font-size:14px;
+  line-height:1;
 }
 .scorer-goals{
   background:#3498db;
@@ -272,6 +278,20 @@ tr:nth-child(even){background:#1a1a1a}
   text-align:left;
   line-height:1.35;
 }
+
+/* Show more button */
+.show-more-btn{
+  border:none;
+  background:rgba(52,152,219,.18);
+  color:#fff;
+  font-weight:900;
+  border:1px solid rgba(52,152,219,.5);
+  border-radius:10px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-size:12px;
+}
+.show-more-btn:hover{background:rgba(52,152,219,.28);}
 </style>
 </head>
 
@@ -356,9 +376,12 @@ tr:nth-child(even){background:#1a1a1a}
           <div class="stat"><div class="label">Points</div><div class="val" id="mPTS">0</div></div>
         </div>
 
-        <!-- ✅ Replaced note with Team Scorers list -->
+        <!-- Team scorers with show more -->
         <div class="team-scorers">
-          <div class="team-scorers-title">Team Scorers</div>
+          <div class="team-scorers-title">
+            <span>Team Scorers</span>
+            <button id="scorersToggleBtn" class="show-more-btn" style="display:none;">Show more</button>
+          </div>
           <div id="teamScorersBox" class="scorers-list"></div>
         </div>
       </div>
@@ -392,13 +415,10 @@ const standingsURL =
 const formURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
 
-/* From your team-stats page */
 const matchesURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=866991516&single=true&output=csv";
 const teamsURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv";
-
-/* ✅ Scorers sheet (team scorers list) */
 const scorersURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=940156222&single=true&output=csv";
 
@@ -420,10 +440,16 @@ function normalizeResult(value){
 }
 
 /* ===== DATA STORES ===== */
-let teamInfoByName = {};        // from Teams sheet
-let matchStatsByTeam = {};      // calculated from Matches sheet
-let teamScorersByTeam = {};     // from Scorers sheet
+let teamInfoByName = {};
+let matchStatsByTeam = {};
+let teamScorersByTeam = {};
 
+/* ===== SHOW MORE STATE ===== */
+let currentTeamForScorers = "";
+let scorersExpanded = false;
+const SCORERS_LIMIT = 5;
+
+/* ===== BUILDERS ===== */
 function buildTeamInfo(teamsCSV){
   const rows = parseCSV(teamsCSV).slice(1);
   teamInfoByName = {};
@@ -491,9 +517,6 @@ function buildMatchStats(matchesCSV){
   });
 }
 
-/* ✅ Build Team Scorers from scorers sheet
-   Columns: Weeks | MatchID | TeamName | Player Name | Time | Owner
-*/
 function buildTeamScorers(scorersCSV){
   const rows = parseCSV(scorersCSV).slice(1);
   teamScorersByTeam = {};
@@ -508,37 +531,59 @@ function buildTeamScorers(scorersCSV){
   });
 }
 
+/* ===== SCORERS RENDER (Top 5 + Show more + 🥇 for top scorer/ties) ===== */
+function getSortedScorers(teamName){
+  const playersMap = teamScorersByTeam[teamName] || null;
+  if(!playersMap) return [];
+
+  return Object.entries(playersMap)
+    .map(([player, goals]) => ({ player, goals }))
+    .sort((a,b)=> b.goals - a.goals || a.player.localeCompare(b.player));
+}
+
 function renderTeamScorers(teamName){
   const box = document.getElementById("teamScorersBox");
+  const btn = document.getElementById("scorersToggleBtn");
+
   box.innerHTML = "";
 
-  const playersMap = teamScorersByTeam[teamName] || null;
-  if(!playersMap){
+  const listAll = getSortedScorers(teamName);
+  if(listAll.length === 0){
+    btn.style.display = "none";
     box.innerHTML = `<div class="scorer-empty">No goals recorded yet for this team.</div>`;
     return;
   }
 
-  const list = Object.entries(playersMap)
-    .map(([player, goals]) => ({ player, goals }))
-    .sort((a,b)=> b.goals - a.goals || a.player.localeCompare(b.player))
-    .slice(0, 8); // Top 8
+  const showList = scorersExpanded ? listAll : listAll.slice(0, SCORERS_LIMIT);
 
-  if(list.length === 0){
-    box.innerHTML = `<div class="scorer-empty">No goals recorded yet for this team.</div>`;
-    return;
-  }
+  // top goals for badge (ties included)
+  const topGoals = listAll[0].goals;
 
-  list.forEach(item=>{
+  showList.forEach(item=>{
     const row = document.createElement("div");
     row.className = "scorer-item";
+    const isTop = item.goals === topGoals;
+
     row.innerHTML = `
-      <div class="scorer-name">${item.player}</div>
+      <div class="scorer-left">
+        ${isTop ? `<span class="scorer-badge">🥇</span>` : ``}
+        <div class="scorer-name">${item.player}</div>
+      </div>
       <div class="scorer-goals">${item.goals} G</div>
     `;
     box.appendChild(row);
   });
+
+  // Show more button
+  if(listAll.length > SCORERS_LIMIT){
+    btn.style.display = "inline-flex";
+    btn.textContent = scorersExpanded ? "Show less" : "Show more";
+  } else {
+    btn.style.display = "none";
+  }
 }
 
+/* ===== MODAL ===== */
 function openTeamModal(teamName){
   const modal = document.getElementById("teamModal");
   const info = teamInfoByName[teamName] || null;
@@ -561,7 +606,9 @@ function openTeamModal(teamName){
   document.getElementById("mGD").textContent = (st.GF - st.GA);
   document.getElementById("mPTS").textContent = st.PTS;
 
-  // Team scorers list
+  // scorers state reset per open
+  currentTeamForScorers = teamName;
+  scorersExpanded = false;
   renderTeamScorers(teamName);
 
   // Team info
@@ -597,7 +644,14 @@ document.addEventListener("keydown", (e)=>{
   if(e.key === "Escape") closeTeamModal();
 });
 
-/* ===== LOAD EVERYTHING TOGETHER (Stable) ===== */
+/* Show more toggle */
+document.getElementById("scorersToggleBtn").addEventListener("click", ()=>{
+  if(!currentTeamForScorers) return;
+  scorersExpanded = !scorersExpanded;
+  renderTeamScorers(currentTeamForScorers);
+});
+
+/* ===== LOAD EVERYTHING ===== */
 Promise.all([
   fetch(formURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
   fetch(standingsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
