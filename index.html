@@ -99,11 +99,11 @@ tr:nth-child(even){background:#1a1a1a}
 <div class="page-header">
   <div class="logo-box">
     <img src="left-logo.png" class="header-logo left">
-    <div id="left-points">Points: 0</div>
+    <div class="player-points" id="left-points">Points: 0</div>
   </div>
   <div class="logo-box">
     <img src="right-logo.png" class="header-logo right">
-    <div id="right-points">Points: 0</div>
+    <div class="player-points" id="right-points">Points: 0</div>
   </div>
 </div>
 
@@ -158,7 +158,7 @@ const formURL =
 
 function parseCSV(t){
   return t.trim().split("\n").map(r =>
-    r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,""))
+    r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,"").trim())
   );
 }
 
@@ -166,26 +166,39 @@ function teamLogoSrc(name){
   return `logos/${encodeURIComponent(name)}.png`;
 }
 
-/* ===== LOAD FORM + STANDINGS TOGETHER (FIXED) ===== */
+/* ✅ يدعم: W / Win / Won — L / Lost / Loss — D / Draw */
+function normalizeResult(value){
+  const v = String(value || "").trim().toLowerCase();
+  if(!v) return "";
+  if(v === "w" || v === "win" || v === "won") return "W";
+  if(v === "l" || v === "lost" || v === "loss" || v === "lose") return "L";
+  if(v === "d" || v === "draw" || v === "tie") return "D";
+  return "";
+}
+
+/* ===== LOAD FORM + STANDINGS TOGETHER (FIXED + NO CACHE) ===== */
 Promise.all([
-  fetch(formURL).then(r=>r.text()),
-  fetch(standingsURL).then(r=>r.text())
+  fetch(formURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
+  fetch(standingsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text())
 ]).then(([formCSV, standingsCSV])=>{
 
   const formParsed = parseCSV(formCSV);
-  const formHeaders = formParsed[0].slice(1).map(h=>h.toLowerCase());
+  const formHeaders = (formParsed[0] || []).slice(1).map(h=>h.trim().toLowerCase());
   const formData = formParsed.slice(1).map(r=>r.slice(1));
 
   const rows = parseCSV(standingsCSV).slice(1,18);
   const tbody = document.querySelector("tbody");
+  tbody.innerHTML = "";
+
   const pointsByOwner = {};
 
   rows.forEach((c,i)=>{
     if(!c[3]) return;
 
-    const team = c[2].trim();
+    const team = (c[2] || "").trim();
     const owner = c[11];
     const pts = +c[10] || 0;
+
     pointsByOwner[owner] = (pointsByOwner[owner]||0) + pts;
 
     let logoClass =
@@ -193,26 +206,28 @@ Promise.all([
       i===1 ? "logo-2" :
       i===2 ? "logo-3" : "logo-rest";
 
+    // ===== FORM =====
     let idx = formHeaders.indexOf(team.toLowerCase());
     let formHTML = "";
 
-    if(idx>-1){
-      formHTML='<div class="form-box">';
+    if(idx > -1){
+      formHTML = '<div class="form-box">';
       formData.forEach(r=>{
-        const v=(r[idx]||"").toLowerCase();
-        if(v==="win") formHTML+='<div class="form-W">W</div>';
-        else if(v==="lost") formHTML+='<div class="form-L">L</div>';
-        else if(v==="draw") formHTML+='<div class="form-D">D</div>';
+        const res = normalizeResult(r[idx]);
+        if(res === "W") formHTML += '<div class="form-W">W</div>';
+        else if(res === "L") formHTML += '<div class="form-L">L</div>';
+        else if(res === "D") formHTML += '<div class="form-D">D</div>';
       });
-      formHTML+='</div>';
+      formHTML += '</div>';
     }
 
-    tbody.innerHTML+=`
+    tbody.innerHTML += `
     <tr>
       <td class="rank">${i+1}</td>
       <td class="logo-col">
         <img class="team-logo ${logoClass}"
              src="${teamLogoSrc(team)}"
+             alt="${team}"
              onerror="this.style.display='none'">
       </td>
       <td class="team-name">${team}</td>
@@ -233,7 +248,8 @@ Promise.all([
     "Points: " + (pointsByOwner["Ahmed Ibrahem"]||0);
   document.getElementById("right-points").textContent =
     "Points: " + (pointsByOwner["Abdoulrahman Atef"]||0);
-});
+})
+.catch(err => console.error("Error loading sheets:", err));
 
 document.querySelector(".rules-toggle").onclick=()=>{
   document.querySelector(".rules-content").classList.toggle("open");
