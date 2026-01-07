@@ -222,10 +222,54 @@ tr:nth-child(even){background:#1a1a1a}
 .rating .k{font-size:12px;opacity:.85;font-weight:700;}
 .rating .v{font-size:18px;font-weight:900;margin-top:4px;}
 
-.note{
+/* ===== Team scorers list ===== */
+.team-scorers{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+.team-scorers-title{
+  font-size:13px;
+  font-weight:900;
+  opacity:.9;
+  margin-bottom:8px;
+  text-align:left;
+}
+.scorers-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.scorer-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  background:rgba(30,30,30,.65);
+  border:1px solid rgba(255,255,255,.08);
+  padding:8px 10px;
+  border-radius:12px;
+}
+.scorer-name{
+  font-weight:900;
+  text-align:left;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.scorer-goals{
+  background:#3498db;
+  border-radius:999px;
+  padding:4px 10px;
+  font-weight:900;
+  font-size:12px;
+  line-height:1;
+  white-space:nowrap;
+}
+.scorer-empty{
   font-size:12px;
   opacity:.85;
-  margin-top:10px;
+  text-align:left;
   line-height:1.35;
 }
 </style>
@@ -311,7 +355,12 @@ tr:nth-child(even){background:#1a1a1a}
           <div class="stat"><div class="label">Goal Diff</div><div class="val" id="mGD">0</div></div>
           <div class="stat"><div class="label">Points</div><div class="val" id="mPTS">0</div></div>
         </div>
-        <div class="note">Stats calculated from Matches sheet (Played only).</div>
+
+        <!-- ✅ Replaced note with Team Scorers list -->
+        <div class="team-scorers">
+          <div class="team-scorers-title">Team Scorers</div>
+          <div id="teamScorersBox" class="scorers-list"></div>
+        </div>
       </div>
 
       <div class="box">
@@ -349,6 +398,10 @@ const matchesURL =
 const teamsURL =
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=0&single=true&output=csv";
 
+/* ✅ Scorers sheet (team scorers list) */
+const scorersURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=940156222&single=true&output=csv";
+
 function parseCSV(t){
   return t.trim().split("\n").map(r =>
     r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,"").trim())
@@ -367,16 +420,14 @@ function normalizeResult(value){
 }
 
 /* ===== DATA STORES ===== */
-let teamInfoByName = {};   // from Teams sheet
-let matchStatsByTeam = {}; // calculated from Matches sheet
+let teamInfoByName = {};        // from Teams sheet
+let matchStatsByTeam = {};      // calculated from Matches sheet
+let teamScorersByTeam = {};     // from Scorers sheet
 
 function buildTeamInfo(teamsCSV){
   const rows = parseCSV(teamsCSV).slice(1);
   teamInfoByName = {};
   rows.forEach(r=>{
-    // Based on your team-stats code:
-    // name:r[1], country:r[3], level:r[5], owner:r[6], rank:r[7],
-    // att:r[8], mid:r[9], def:r[10], keyPlayer:r[11], keyRating:r[12], keyPos:r[13]
     const name = (r[1] || "").trim();
     if(!name) return;
 
@@ -411,8 +462,6 @@ function buildMatchStats(matchesCSV){
   }
 
   rows.forEach(m=>{
-    // Based on your team-stats code:
-    // h=m[2], a=m[11], hs=+m[6], as=+m[7], status=m[15]
     const status = (m[15] || "").trim();
     if(status !== "Played") return;
 
@@ -442,6 +491,54 @@ function buildMatchStats(matchesCSV){
   });
 }
 
+/* ✅ Build Team Scorers from scorers sheet
+   Columns: Weeks | MatchID | TeamName | Player Name | Time | Owner
+*/
+function buildTeamScorers(scorersCSV){
+  const rows = parseCSV(scorersCSV).slice(1);
+  teamScorersByTeam = {};
+
+  rows.forEach(r=>{
+    const team = (r[2] || "").trim();
+    const player = (r[3] || "").trim();
+    if(!team || !player) return;
+
+    if(!teamScorersByTeam[team]) teamScorersByTeam[team] = {};
+    teamScorersByTeam[team][player] = (teamScorersByTeam[team][player] || 0) + 1;
+  });
+}
+
+function renderTeamScorers(teamName){
+  const box = document.getElementById("teamScorersBox");
+  box.innerHTML = "";
+
+  const playersMap = teamScorersByTeam[teamName] || null;
+  if(!playersMap){
+    box.innerHTML = `<div class="scorer-empty">No goals recorded yet for this team.</div>`;
+    return;
+  }
+
+  const list = Object.entries(playersMap)
+    .map(([player, goals]) => ({ player, goals }))
+    .sort((a,b)=> b.goals - a.goals || a.player.localeCompare(b.player))
+    .slice(0, 8); // Top 8
+
+  if(list.length === 0){
+    box.innerHTML = `<div class="scorer-empty">No goals recorded yet for this team.</div>`;
+    return;
+  }
+
+  list.forEach(item=>{
+    const row = document.createElement("div");
+    row.className = "scorer-item";
+    row.innerHTML = `
+      <div class="scorer-name">${item.player}</div>
+      <div class="scorer-goals">${item.goals} G</div>
+    `;
+    box.appendChild(row);
+  });
+}
+
 function openTeamModal(teamName){
   const modal = document.getElementById("teamModal");
   const info = teamInfoByName[teamName] || null;
@@ -463,6 +560,9 @@ function openTeamModal(teamName){
   document.getElementById("mGA").textContent = st.GA;
   document.getElementById("mGD").textContent = (st.GF - st.GA);
   document.getElementById("mPTS").textContent = st.PTS;
+
+  // Team scorers list
+  renderTeamScorers(teamName);
 
   // Team info
   document.getElementById("tATT").textContent = info ? info.att : "-";
@@ -502,12 +602,13 @@ Promise.all([
   fetch(formURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
   fetch(standingsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
   fetch(matchesURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
-  fetch(teamsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text())
-]).then(([formCSV, standingsCSV, matchesCSV, teamsCSV])=>{
+  fetch(teamsURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
+  fetch(scorersURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text())
+]).then(([formCSV, standingsCSV, matchesCSV, teamsCSV, scorersCSV])=>{
 
-  // Build extra sources for the modal
   buildTeamInfo(teamsCSV);
   buildMatchStats(matchesCSV);
+  buildTeamScorers(scorersCSV);
 
   // Form sheet
   const formParsed = parseCSV(formCSV);
@@ -580,7 +681,7 @@ Promise.all([
   // Click handlers for teams (logo OR name)
   tbody.querySelectorAll("tr[data-team]").forEach(tr=>{
     const teamName = tr.getAttribute("data-team");
-    const logoTd = tr.children[1]; // logo col
+    const logoTd = tr.children[1];
     const nameTd = tr.querySelector(".team-name");
     logoTd.addEventListener("click", ()=> openTeamModal(teamName));
     nameTd.addEventListener("click", ()=> openTeamModal(teamName));
