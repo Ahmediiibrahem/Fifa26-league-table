@@ -11,12 +11,12 @@
 .header-logo { height: 100px; object-fit: contain; }
 .player-points { margin-top: 5px; font-family: 'Cairo', Arial, sans-serif; font-weight: 700; font-size: 16px; color: #fff; }
 
-nav { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+nav { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap:wrap; padding:0 10px; }
 nav a { text-decoration: none; color: #fff; font-weight: 700; padding: 10px 25px; border-radius: 8px; transition: all 0.3s ease; background: #2b2b2b; }
 nav a:hover { background: #3498db; color: #fff; transform: scale(1.05); }
 nav a.active { background: #3498db; color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
 
-body { font-family:'Cairo', Arial, sans-serif; color:#fff; font-weight:700; background: linear-gradient( rgba(15,15,15,0.85), rgba(15,15,15,0.85) ), url("standings-bg.jpg"); background-size: cover; background-position: center; background-attachment: fixed; }
+body { font-family:'Cairo', Arial, sans-serif; color:#fff; font-weight:700; background: linear-gradient( rgba(15,15,15,0.85), rgba(15,15,15,0.85) ), url("standings-bg.jpg"); background-size: cover; background-position: center; background-attachment: fixed; margin:0; }
 
 h2 { text-align:center; margin-bottom:15px; font-family: 'Cairo', Arial, sans-serif; font-weight: 800; }
 
@@ -25,7 +25,22 @@ th { background:#2b2b2b; padding:10px; font-weight: 800; }
 td { padding:8px; text-align:center; font-weight: 700; }
 tr:nth-child(even) { background:#1a1a1a; }
 .rank { background:#3a3a3a; font-weight:bold; }
+
+/* ===== Team cell with logo ===== */
 .team { text-align:center; border-collapse: collapse; }
+.team-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.team-logo{
+  width:26px;
+  height:26px;
+  object-fit:contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+}
 
 .form-box { display: flex; justify-content: center; gap: 3px; }
 .form-box div { width: 18px; height: 18px; line-height: 18px; font-size: 12px; font-weight: bold; color: #fff; border-radius: 3px; text-align: center; }
@@ -60,7 +75,6 @@ tr:nth-child(even) { background:#1a1a1a; }
     <a href="upcoming.html">Upcoming</a>
     <a href="team-stats.html">Stats</a>
     <a href="scorers.html">Scorers</a>
-
 </nav>
 
 <h2>League Table</h2>
@@ -108,9 +122,19 @@ function parseCSV(text) {
     );
 }
 
+/* ===== team logo helper =====
+   You said images are EXACTLY same as Team names.
+   We'll URL-encode the name to handle spaces & special chars.
+   Example: "Real Madrid.png" => logos/Real%20Madrid.png
+*/
+function teamLogoSrc(teamName){
+    return `logos/${encodeURIComponent(teamName)}.png`;
+}
+
 let formData = [];
 let formHeaders = [];
 
+// Load form first
 fetch(formURL + "&t=" + Date.now())
 .then(res => res.text())
 .then(csv => {
@@ -133,19 +157,21 @@ fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
     rows.forEach((cols, index) => {
         if (!cols[3]) return;
 
+        const teamDisplay = (cols[2] || "").trim();
         const owner = cols[11];
         const points = parseInt(cols[10]) || 0;
+
         if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
         pointsByOwner[owner] += points;
 
         // Form لكل فريق
-        let teamName = cols[2].trim().toLowerCase();
-        let teamIndex = formHeaders.findIndex(h => h === teamName);
+        let teamNameLower = teamDisplay.toLowerCase();
+        let teamIndex = formHeaders.findIndex(h => h === teamNameLower);
         let formHTML = "";
         if (teamIndex !== -1) {
             formHTML = '<div class="form-box">';
             formData.forEach(round => {
-                let res = round[teamIndex].trim().toLowerCase();
+                let res = (round[teamIndex] || "").trim().toLowerCase();
                 if (res === "win") formHTML += `<div class="form-W">W</div>`;
                 else if (res === "lost") formHTML += `<div class="form-L">L</div>`;
                 else if (res === "draw") formHTML += `<div class="form-D">D</div>`;
@@ -156,7 +182,15 @@ fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
         tbody.innerHTML += `
         <tr>
             <td class="rank">${index + 1}</td>
-            <td class="team">${cols[2]}</td>
+            <td class="team">
+              <div class="team-cell">
+                <img class="team-logo"
+                     src="${teamLogoSrc(teamDisplay)}"
+                     alt="${teamDisplay}"
+                     onerror="this.style.display='none'">
+                <span>${teamDisplay}</span>
+              </div>
+            </td>
             <td>${cols[3]}</td>
             <td>${cols[4]}</td>
             <td>${cols[5]}</td>
@@ -169,7 +203,7 @@ fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
             <td>${formHTML}</td>
         </tr>`;
 
-        // حفظ بيانات اللاعب لصفحة player-stats
+        // حفظ بيانات اللاعب لصفحة player-stats (زي ما هو عندك)
         if (!(owner in playersData)) {
             playersData[owner] = {
                 matchesPlayed: parseInt(cols[3]) || 0,
@@ -179,7 +213,9 @@ fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
                 goalsFor: parseInt(cols[8]) || 0,
                 goalsAgainst: parseInt(cols[9]) || 0,
                 points: parseInt(cols[10]) || 0,
-                logo: owner === "Ahmed Ibrahem" ? document.querySelector(".header-logo.left").src : document.querySelector(".header-logo.right").src
+                logo: owner === "Ahmed Ibrahem"
+                    ? document.querySelector(".header-logo.left").src
+                    : document.querySelector(".header-logo.right").src
             };
         }
     });
