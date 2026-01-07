@@ -5,243 +5,227 @@
 <title>League Table</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" type="image/jpeg" href="FaviconFifa26.jpeg">
+
 <style>
-.page-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
-.logo-box { text-align: center; cursor: pointer; }
-.header-logo { height: 100px; object-fit: contain; }
-.player-points { margin-top: 5px; font-family: 'Cairo', Arial, sans-serif; font-weight: 700; font-size: 16px; color: #fff; }
+.page-header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; }
+.logo-box { text-align:center; cursor:pointer; }
+.header-logo { height:100px; object-fit:contain; }
+.player-points { margin-top:5px; font-weight:700; font-size:16px; }
 
-nav { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap:wrap; padding:0 10px; }
-nav a { text-decoration: none; color: #fff; font-weight: 700; padding: 10px 25px; border-radius: 8px; transition: all 0.3s ease; background: #2b2b2b; }
-nav a:hover { background: #3498db; color: #fff; transform: scale(1.05); }
-nav a.active { background: #3498db; color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-
-body { font-family:'Cairo', Arial, sans-serif; color:#fff; font-weight:700; background: linear-gradient( rgba(15,15,15,0.85), rgba(15,15,15,0.85) ), url("standings-bg.jpg"); background-size: cover; background-position: center; background-attachment: fixed; margin:0; }
-
-h2 { text-align:center; margin-bottom:15px; font-family: 'Cairo', Arial, sans-serif; font-weight: 800; }
-
-table { width: 100%; border-collapse: collapse; font-size:14px; font-family: 'Cairo', Arial, sans-serif; font-weight: 700; }
-th { background:#2b2b2b; padding:10px; font-weight: 800; }
-td { padding:8px; text-align:center; font-weight: 700; }
-tr:nth-child(even) { background:#1a1a1a; }
-.rank { background:#3a3a3a; font-weight:bold; }
-
-/* ===== Team cell with logo ===== */
-.team { text-align:center; border-collapse: collapse; }
-.team-cell{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
+nav { display:flex; justify-content:center; gap:20px; margin-bottom:20px; flex-wrap:wrap; }
+nav a {
+  text-decoration:none; color:#fff; font-weight:700;
+  padding:10px 25px; border-radius:8px;
+  background:#2b2b2b; transition:.3s;
 }
+nav a:hover { background:#3498db; transform:scale(1.05); }
+nav a.active { background:#3498db; box-shadow:0 4px 8px rgba(0,0,0,.3); }
+
+body{
+  font-family:'Cairo',Arial,sans-serif;
+  color:#fff; font-weight:700;
+  background:linear-gradient(rgba(15,15,15,.85),rgba(15,15,15,.85)),url("standings-bg.jpg");
+  background-size:cover; background-attachment:fixed;
+  margin:0;
+}
+
+h2{ text-align:center; margin-bottom:15px; font-weight:800; }
+
+table{ width:100%; border-collapse:collapse; font-size:14px; }
+th{ background:#2b2b2b; padding:10px; font-weight:800; }
+td{ padding:8px; font-weight:700; }
+tr:nth-child(even){ background:#1a1a1a; }
+
+.rank,
+.logo-col{
+  background:#3a3a3a;
+  text-align:center;
+  font-weight:800;
+}
+
+/* ===== LOGO COLUMN ===== */
 .team-logo{
   width:26px;
   height:26px;
   object-fit:contain;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
 
-.form-box { display: flex; justify-content: center; gap: 3px; }
-.form-box div { width: 18px; height: 18px; line-height: 18px; font-size: 12px; font-weight: bold; color: #fff; border-radius: 3px; text-align: center; }
+/* ===== TEAM NAME ===== */
+.team-name{
+  text-align:left;
+  padding-left:10px;
+  white-space:nowrap;
+}
 
-.form-W { background-color: green; }
-.form-L { background-color: red; }
-.form-D { background-color: gray; }
+/* ===== FORM ===== */
+.form-box{ display:flex; justify-content:center; gap:3px; }
+.form-box div{
+  width:18px; height:18px; line-height:18px;
+  font-size:12px; font-weight:800;
+  border-radius:3px; text-align:center;
+}
+.form-W{ background:green; }
+.form-L{ background:red; }
+.form-D{ background:gray; }
 
-.rules-container { width: 90%; margin: 20px auto; font-family: 'Cairo', Arial, sans-serif; }
-.rules-toggle { width: 100%; background: #2b2b2b; color: #fff; border: none; padding: 12px 20px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease; }
-.rules-toggle:hover { background: #3498db; }
-.rules-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease, padding 0.5s ease; background: #1a1a1a; padding: 0 20px; border-radius: 8px; margin-top: 5px; font-weight: 600; }
-.rules-content.open { max-height: 500px; padding: 15px 20px; }
+/* ===== RULES ===== */
+.rules-container{ width:90%; margin:20px auto; }
+.rules-toggle{
+  width:100%; background:#2b2b2b; color:#fff;
+  border:none; padding:12px 20px;
+  font-size:16px; font-weight:700;
+  border-radius:8px; cursor:pointer;
+  display:flex; justify-content:space-between;
+}
+.rules-toggle:hover{ background:#3498db; }
+.rules-content{
+  max-height:0; overflow:hidden;
+  transition:.5s;
+  background:#1a1a1a;
+  padding:0 20px;
+  border-radius:8px;
+}
+.rules-content.open{ max-height:500px; padding:15px 20px; }
 </style>
 </head>
+
 <body>
 
 <div class="page-header">
-    <div class="logo-box">
-        <img src="left-logo.png" alt="Left Logo" class="header-logo left">
-        <div class="player-points" id="left-points">Points: 0</div>
-    </div>
-    <div class="logo-box">
-        <img src="right-logo.png" alt="Right Logo" class="header-logo right">
-        <div class="player-points" id="right-points">Points: 0</div>
-    </div>
+  <div class="logo-box">
+    <img src="left-logo.png" class="header-logo left">
+    <div id="left-points">Points: 0</div>
+  </div>
+  <div class="logo-box">
+    <img src="right-logo.png" class="header-logo right">
+    <div id="right-points">Points: 0</div>
+  </div>
 </div>
 
 <nav>
-    <a href="index.html" class="active">Standings</a>
-    <a href="matches.html">Results</a>
-    <a href="upcoming.html">Upcoming</a>
-    <a href="team-stats.html">Stats</a>
-    <a href="scorers.html">Scorers</a>
+  <a href="index.html" class="active">Standings</a>
+  <a href="matches.html">Results</a>
+  <a href="upcoming.html">Upcoming</a>
+  <a href="team-stats.html">Stats</a>
+  <a href="scorers.html">Scorers</a>
 </nav>
 
 <h2>League Table</h2>
 
 <table>
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Team</th>
-            <th>P</th>
-            <th>W</th>
-            <th>D</th>
-            <th>L</th>
-            <th>DIFF</th>
-            <th>G/S</th>
-            <th>G/C</th>
-            <th>Points</th>
-            <th>Owner</th>
-            <th>Form</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Logo</th>
+  <th>Team</th>
+  <th>P</th>
+  <th>W</th>
+  <th>D</th>
+  <th>L</th>
+  <th>DIFF</th>
+  <th>G/S</th>
+  <th>G/C</th>
+  <th>Points</th>
+  <th>Owner</th>
+  <th>Form</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 
 <div class="rules-container">
-    <button class="rules-toggle">Rules &#9660;</button>
-    <div class="rules-content">
-        <p>In the event that two (or more) teams finish with an equal number of points, the following rules break the tie:</p>
-        <ol>
-            <li>Points total</li>
-            <li>Goal difference</li>
-            <li>G/S</li>
-            <li>G/C</li>
-        </ol>
-    </div>
+<button class="rules-toggle">Rules ▼</button>
+<div class="rules-content">
+  <p>If teams finish level on points:</p>
+  <ol>
+    <li>Points</li>
+    <li>Goal Difference</li>
+    <li>Goals Scored</li>
+    <li>Goals Conceded</li>
+  </ol>
+</div>
 </div>
 
 <script>
-const standingsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
-const formURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
+const standingsURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
 
-function parseCSV(text) {
-    return text.trim().split("\n").map(row =>
-        row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, ''))
-    );
+const formURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=882748508&single=true&output=csv";
+
+function parseCSV(t){
+  return t.trim().split("\n").map(r =>
+    r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,""))
+  );
 }
 
-/* ===== team logo helper =====
-   You said images are EXACTLY same as Team names.
-   We'll URL-encode the name to handle spaces & special chars.
-   Example: "Real Madrid.png" => logos/Real%20Madrid.png
-*/
-function teamLogoSrc(teamName){
-    return `logos/${encodeURIComponent(teamName)}.png`;
+function teamLogoSrc(name){
+  return `logos/${encodeURIComponent(name)}.png`;
 }
 
-let formData = [];
-let formHeaders = [];
+let formData=[], formHeaders=[];
 
-// Load form first
-fetch(formURL + "&t=" + Date.now())
-.then(res => res.text())
-.then(csv => {
-    const data = parseCSV(csv);
-    formHeaders = data[0].slice(1).map(h => h.trim().toLowerCase());
-    formData = data.slice(1).map(r => r.slice(1));
-})
-.catch(err => console.error("Error loading form sheet:", err));
-
-fetch(standingsURL + "&t=" + Date.now(), { cache: "no-store" })
-.then(res => res.text())
-.then(csv => {
-    const data = parseCSV(csv);
-    const rows = data.slice(1, 18);
-    const tbody = document.querySelector("tbody");
-    tbody.innerHTML = "";
-    const pointsByOwner = {};
-    const playersData = {};
-
-    rows.forEach((cols, index) => {
-        if (!cols[3]) return;
-
-        const teamDisplay = (cols[2] || "").trim();
-        const owner = cols[11];
-        const points = parseInt(cols[10]) || 0;
-
-        if (!pointsByOwner[owner]) pointsByOwner[owner] = 0;
-        pointsByOwner[owner] += points;
-
-        // Form لكل فريق
-        let teamNameLower = teamDisplay.toLowerCase();
-        let teamIndex = formHeaders.findIndex(h => h === teamNameLower);
-        let formHTML = "";
-        if (teamIndex !== -1) {
-            formHTML = '<div class="form-box">';
-            formData.forEach(round => {
-                let res = (round[teamIndex] || "").trim().toLowerCase();
-                if (res === "win") formHTML += `<div class="form-W">W</div>`;
-                else if (res === "lost") formHTML += `<div class="form-L">L</div>`;
-                else if (res === "draw") formHTML += `<div class="form-D">D</div>`;
-            });
-            formHTML += '</div>';
-        }
-
-        tbody.innerHTML += `
-        <tr>
-            <td class="rank">${index + 1}</td>
-            <td class="team">
-              <div class="team-cell">
-                <img class="team-logo"
-                     src="${teamLogoSrc(teamDisplay)}"
-                     alt="${teamDisplay}"
-                     onerror="this.style.display='none'">
-                <span>${teamDisplay}</span>
-              </div>
-            </td>
-            <td>${cols[3]}</td>
-            <td>${cols[4]}</td>
-            <td>${cols[5]}</td>
-            <td>${cols[6]}</td>
-            <td>${cols[7]}</td>
-            <td>${cols[8]}</td>
-            <td>${cols[9]}</td>
-            <td>${cols[10]}</td>
-            <td>${cols[11]}</td>
-            <td>${formHTML}</td>
-        </tr>`;
-
-        // حفظ بيانات اللاعب لصفحة player-stats (زي ما هو عندك)
-        if (!(owner in playersData)) {
-            playersData[owner] = {
-                matchesPlayed: parseInt(cols[3]) || 0,
-                wins: parseInt(cols[4]) || 0,
-                draws: parseInt(cols[5]) || 0,
-                losses: parseInt(cols[6]) || 0,
-                goalsFor: parseInt(cols[8]) || 0,
-                goalsAgainst: parseInt(cols[9]) || 0,
-                points: parseInt(cols[10]) || 0,
-                logo: owner === "Ahmed Ibrahem"
-                    ? document.querySelector(".header-logo.left").src
-                    : document.querySelector(".header-logo.right").src
-            };
-        }
-    });
-
-    document.getElementById("left-points").textContent = `Points: ${pointsByOwner["Ahmed Ibrahem"] || 0}`;
-    document.getElementById("right-points").textContent = `Points: ${pointsByOwner["Abdoulrahman Atef"] || 0}`;
-
-    // ربط اللوجوهات بالضغط
-    document.querySelector(".header-logo.left").addEventListener("click", () => {
-        localStorage.setItem("player1", JSON.stringify(playersData["Ahmed Ibrahem"]));
-        window.location.href = "player-stats.html";
-    });
-    document.querySelector(".header-logo.right").addEventListener("click", () => {
-        localStorage.setItem("player2", JSON.stringify(playersData["Abdoulrahman Atef"]));
-        window.location.href = "player-stats.html";
-    });
-
-})
-.catch(err => console.error("Error loading standings sheet:", err));
-
-document.querySelector(".rules-toggle").addEventListener("click", function() {
-    const content = document.querySelector(".rules-content");
-    content.classList.toggle("open");
-    const arrow = content.classList.contains("open") ? "&#9650;" : "&#9660;";
-    this.innerHTML = `Rules ${arrow}`;
+fetch(formURL).then(r=>r.text()).then(csv=>{
+  const d=parseCSV(csv);
+  formHeaders=d[0].slice(1).map(h=>h.toLowerCase());
+  formData=d.slice(1).map(r=>r.slice(1));
 });
+
+fetch(standingsURL).then(r=>r.text()).then(csv=>{
+  const rows=parseCSV(csv).slice(1,18);
+  const tbody=document.querySelector("tbody");
+  const pointsByOwner={};
+
+  rows.forEach((c,i)=>{
+    if(!c[3]) return;
+    const team=c[2].trim();
+    const owner=c[11];
+    const pts=+c[10]||0;
+    pointsByOwner[owner]=(pointsByOwner[owner]||0)+pts;
+
+    let idx=formHeaders.indexOf(team.toLowerCase());
+    let formHTML="";
+    if(idx>-1){
+      formHTML='<div class="form-box">';
+      formData.forEach(r=>{
+        const v=(r[idx]||"").toLowerCase();
+        if(v==="win") formHTML+='<div class="form-W">W</div>';
+        else if(v==="lost") formHTML+='<div class="form-L">L</div>';
+        else if(v==="draw") formHTML+='<div class="form-D">D</div>';
+      });
+      formHTML+='</div>';
+    }
+
+    tbody.innerHTML+=`
+    <tr>
+      <td class="rank">${i+1}</td>
+      <td class="logo-col">
+        <img class="team-logo" src="${teamLogoSrc(team)}" onerror="this.style.display='none'">
+      </td>
+      <td class="team-name">${team}</td>
+      <td>${c[3]}</td>
+      <td>${c[4]}</td>
+      <td>${c[5]}</td>
+      <td>${c[6]}</td>
+      <td>${c[7]}</td>
+      <td>${c[8]}</td>
+      <td>${c[9]}</td>
+      <td>${c[10]}</td>
+      <td>${c[11]}</td>
+      <td>${formHTML}</td>
+    </tr>`;
+  });
+
+  document.getElementById("left-points").textContent =
+    "Points: " + (pointsByOwner["Ahmed Ibrahem"]||0);
+  document.getElementById("right-points").textContent =
+    "Points: " + (pointsByOwner["Abdoulrahman Atef"]||0);
+});
+
+document.querySelector(".rules-toggle").onclick=()=>{
+  document.querySelector(".rules-content").classList.toggle("open");
+};
 </script>
 
 </body>
