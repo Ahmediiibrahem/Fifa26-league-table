@@ -10,7 +10,7 @@
 /* ===== HEADER ===== */
 .page-header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;}
 .logo-box{text-align:center;cursor:pointer;}
-.header-logo{height:100px;}
+.header-logo{height:100px;object-fit:contain;}
 .player-points{margin-top:5px;font-size:16px;font-weight:700}
 
 /* ===== NAV ===== */
@@ -44,7 +44,7 @@ tr:nth-child(even){background:#1a1a1a}
   font-weight:800;
 }
 
-/* logo column: lighter shade than rank */
+/* عمود اللوجو – أفتح شوية من # */
 .logo-col{
   background:rgba(58,58,58,.6);
 }
@@ -61,8 +61,6 @@ tr:nth-child(even){background:#1a1a1a}
   object-fit:contain;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
-
-/* sizes by rank */
 .logo-1{width:34px;height:34px;}
 .logo-2{width:30px;height:30px;}
 .logo-3{width:28px;height:28px;}
@@ -72,11 +70,12 @@ tr:nth-child(even){background:#1a1a1a}
 .form-box{display:flex;justify-content:center;gap:3px}
 .form-box div{
   width:18px;height:18px;line-height:18px;
-  font-size:12px;font-weight:800;border-radius:3px
+  font-size:12px;font-weight:800;
+  border-radius:3px;color:#fff;
 }
-.form-W{background:green}
-.form-L{background:red}
-.form-D{background:gray}
+.form-W{background:#27ae60}
+.form-L{background:#e74c3c}
+.form-D{background:#7f8c8d}
 
 /* ===== RULES ===== */
 .rules-container{width:90%;margin:20px auto}
@@ -99,11 +98,11 @@ tr:nth-child(even){background:#1a1a1a}
 
 <div class="page-header">
   <div class="logo-box">
-    <img src="left-logo.png" class="header-logo">
+    <img src="left-logo.png" class="header-logo left">
     <div id="left-points">Points: 0</div>
   </div>
   <div class="logo-box">
-    <img src="right-logo.png" class="header-logo">
+    <img src="right-logo.png" class="header-logo right">
     <div id="right-points">Points: 0</div>
   </div>
 </div>
@@ -167,33 +166,36 @@ function teamLogoSrc(name){
   return `logos/${encodeURIComponent(name)}.png`;
 }
 
-let formData=[], formHeaders=[];
+/* ===== LOAD FORM + STANDINGS TOGETHER (FIXED) ===== */
+Promise.all([
+  fetch(formURL).then(r=>r.text()),
+  fetch(standingsURL).then(r=>r.text())
+]).then(([formCSV, standingsCSV])=>{
 
-fetch(formURL).then(r=>r.text()).then(csv=>{
-  const d=parseCSV(csv);
-  formHeaders=d[0].slice(1).map(h=>h.toLowerCase());
-  formData=d.slice(1).map(r=>r.slice(1));
-});
+  const formParsed = parseCSV(formCSV);
+  const formHeaders = formParsed[0].slice(1).map(h=>h.toLowerCase());
+  const formData = formParsed.slice(1).map(r=>r.slice(1));
 
-fetch(standingsURL).then(r=>r.text()).then(csv=>{
-  const rows=parseCSV(csv).slice(1,18);
-  const tbody=document.querySelector("tbody");
-  const pointsByOwner={};
+  const rows = parseCSV(standingsCSV).slice(1,18);
+  const tbody = document.querySelector("tbody");
+  const pointsByOwner = {};
 
   rows.forEach((c,i)=>{
     if(!c[3]) return;
-    const team=c[2].trim();
-    const owner=c[11];
-    const pts=+c[10]||0;
-    pointsByOwner[owner]=(pointsByOwner[owner]||0)+pts;
+
+    const team = c[2].trim();
+    const owner = c[11];
+    const pts = +c[10] || 0;
+    pointsByOwner[owner] = (pointsByOwner[owner]||0) + pts;
 
     let logoClass =
       i===0 ? "logo-1" :
       i===1 ? "logo-2" :
       i===2 ? "logo-3" : "logo-rest";
 
-    let idx=formHeaders.indexOf(team.toLowerCase());
-    let formHTML="";
+    let idx = formHeaders.indexOf(team.toLowerCase());
+    let formHTML = "";
+
     if(idx>-1){
       formHTML='<div class="form-box">';
       formData.forEach(r=>{
