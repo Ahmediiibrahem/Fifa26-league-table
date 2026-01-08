@@ -28,6 +28,29 @@ nav a.active,nav a:hover{background:#3498db;}
 .wrap{max-width:1200px;margin:auto;padding:0 10px 30px}
 h2{text-align:center;margin:10px 0 14px;font-weight:900}
 
+/* ===== All Teams button (separate) ===== */
+.allteams-wrap{display:flex;justify-content:center;margin:10px 0 14px;}
+.allteams-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:10px 18px;
+  border-radius:14px;
+  background:#2b2b2b;
+  border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  transition:.2s;
+  font-weight:900;
+  user-select:none;
+}
+.allteams-btn:hover{background:#3498db}
+.allteams-btn.active{
+  background:#3498db;
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+  border-color:rgba(52,152,219,.6);
+}
+
 /* TEAM TABS: 2 rows (8 columns) */
 .club-tabs{
   display:grid;
@@ -38,24 +61,35 @@ h2{text-align:center;margin:10px 0 14px;font-weight:900}
 @media(max-width:900px){ .club-tabs{grid-template-columns:repeat(4,1fr)} }
 @media(max-width:520px){ .club-tabs{grid-template-columns:repeat(2,1fr)} }
 
-.tab{
+/* ✅ equal-size tabs + centered logo */
+.club-tab{
   background:#2b2b2b;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
   cursor:pointer;
   transition:.2s;
-  border:1px solid rgba(255,255,255,.10);
   user-select:none;
-}
-.tab:hover{background:#3498db}
-.tab.active{background:#3498db;box-shadow:0 6px 14px rgba(0,0,0,.35);border-color:rgba(52,152,219,.6)}
 
-.tab img{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
-.tab.all-teams{
-  display:flex;align-items:center;justify-content:center;
-  font-weight:900;
-  gap:8px;
+  /* same size for all */
+  height:64px;
+
+  /* center logo */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.club-tab:hover{background:#3498db}
+.club-tab.active{
+  background:#3498db;
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+  border-color:rgba(52,152,219,.6);
+}
+
+.club-tab img{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
 
 /* Divider */
@@ -63,6 +97,18 @@ h2{text-align:center;margin:10px 0 14px;font-weight:900}
 
 /* Row Tabs */
 .tabs-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.tab{
+  background:#2b2b2b;
+  border-radius:12px;
+  padding:10px 14px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+  border:1px solid rgba(255,255,255,.10);
+  font-weight:900;
+}
+.tab:hover{background:#3498db}
+.tab.active{background:#3498db;box-shadow:0 6px 14px rgba(0,0,0,.35);border-color:rgba(52,152,219,.6)}
 
 /* Search */
 .search-box{
@@ -133,7 +179,12 @@ tr:nth-child(even){background:#1a1a1a}
 <div class="wrap">
   <h2>Squads</h2>
 
-  <!-- Clubs -->
+  <!-- ✅ All Teams separate button -->
+  <div class="allteams-wrap">
+    <div id="allTeamsBtn" class="allteams-btn active">🌍 All Teams</div>
+  </div>
+
+  <!-- Clubs (16 logos = 2 rows x 8) -->
   <div id="clubTabs" class="club-tabs"></div>
 
   <div class="divider"></div>
@@ -207,44 +258,43 @@ function fmtM(v){
   return String(n);
 }
 
-/* ✅ normalize PositionSC to exact: GK / Def / Mid / Att */
+/* normalize PositionSC to exact: GK / Def / Mid / Att */
 function normPosSC(x){
   const s = String(x||"").trim().toLowerCase();
   if(!s) return "";
   if(s === "gk" || s.includes("goal")) return "GK";
-  if(s === "def" || s === "df" || s.includes("back")) return "Def";
-  if(s === "mid" || s === "mf" || s.includes("mid")) return "Mid";
-  if(s === "att" || s === "fw" || s.includes("for") || s.includes("attack")) return "Att";
-  // fallback: capitalize first
+  if(s === "def" || s === "df") return "Def";
+  if(s === "mid" || s === "mf") return "Mid";
+  if(s === "att" || s === "fw") return "Att";
+  // fallback: attempt first 3
+  if(s.startsWith("def")) return "Def";
+  if(s.startsWith("mid")) return "Mid";
+  if(s.startsWith("att")) return "Att";
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /* State */
 let all = [];
 let clubs = [];
-let goalsMap = {}; // key: team||player => goals
+let goalsMap = {};
 
 let activeClub = "ALL";
 let activePos  = "All";
 let activeSort = "all"; // all/shirt/age/value/name/goals
 
-/* Tabs builders (build once) */
+/* Build tabs once */
 function buildTabs(){
-  // Club tabs
+  // All Teams button
+  const allBtn = document.getElementById("allTeamsBtn");
+  allBtn.onclick = ()=> setClub("ALL");
+
+  // Club tabs (16)
   const ct = document.getElementById("clubTabs");
   ct.innerHTML = "";
-
-  const allTeamsTab = document.createElement("div");
-  allTeamsTab.className = "tab all-teams active";
-  allTeamsTab.id = "tab_club_ALL";
-  allTeamsTab.innerHTML = "🌍 <span>All Teams</span>";
-  allTeamsTab.onclick = ()=> setClub("ALL");
-  ct.appendChild(allTeamsTab);
-
   clubs.forEach(c=>{
     const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.id = "tab_club_" + cssSafeId(c);
+    tab.className = "club-tab";
+    tab.id = "club_" + cssSafeId(c);
 
     const img = document.createElement("img");
     img.src = logoSrc(c);
@@ -262,58 +312,77 @@ function buildTabs(){
   ["All","GK","Def","Mid","Att"].forEach(p=>{
     const tab = document.createElement("div");
     tab.className = "tab" + (p===activePos ? " active":"");
-    tab.id = "tab_pos_" + p;
+    tab.id = "pos_" + p;
     tab.textContent = p;
     tab.onclick = ()=> setPos(p);
     pt.appendChild(tab);
   });
 
-  // Sort tabs (✅ includes All + Goals)
+  // Sort tabs
   const st = document.getElementById("sortTabs");
   st.innerHTML = "";
-
   const sorts = [
     {k:"all",   label:"All"},
     {k:"shirt", label:"Shirt #"},
     {k:"age",   label:"Age"},
     {k:"value", label:"Value"},
     {k:"name",  label:"Name"},
-    {k:"goals", label:"Goals"}
+    {k:"goals", label:"Goals"},
   ];
-
   sorts.forEach(s=>{
     const tab = document.createElement("div");
     tab.className = "tab" + (s.k===activeSort ? " active":"");
-    tab.id = "tab_sort_" + s.k;
+    tab.id = "sort_" + s.k;
     tab.textContent = s.label;
     tab.onclick = ()=> setSort(s.k);
     st.appendChild(tab);
   });
+
+  // Apply active visuals for initial state
+  refreshActiveVisuals();
 }
 
 function cssSafeId(s){
   return btoa(unescape(encodeURIComponent(String(s)))).replace(/=+/g,"");
 }
 
-function setActiveTab(prefix, id){
-  document.querySelectorAll(`[id^="${prefix}"]`).forEach(el=> el.classList.remove("active"));
-  const target = document.getElementById(prefix + id);
-  if(target) target.classList.add("active");
+function refreshActiveVisuals(){
+  // All Teams button state
+  const allBtn = document.getElementById("allTeamsBtn");
+  if(activeClub === "ALL") allBtn.classList.add("active");
+  else allBtn.classList.remove("active");
+
+  // club tabs
+  document.querySelectorAll(".club-tab").forEach(el=> el.classList.remove("active"));
+  if(activeClub !== "ALL"){
+    const el = document.getElementById("club_" + cssSafeId(activeClub));
+    if(el) el.classList.add("active");
+  }
+
+  // pos tabs
+  document.querySelectorAll('[id^="pos_"]').forEach(el=> el.classList.remove("active"));
+  const pEl = document.getElementById("pos_" + activePos);
+  if(pEl) pEl.classList.add("active");
+
+  // sort tabs
+  document.querySelectorAll('[id^="sort_"]').forEach(el=> el.classList.remove("active"));
+  const sEl = document.getElementById("sort_" + activeSort);
+  if(sEl) sEl.classList.add("active");
 }
 
 function setClub(c){
   activeClub = c;
-  setActiveTab("tab_club_", c==="ALL" ? "ALL" : cssSafeId(c));
+  refreshActiveVisuals();
   render();
 }
 function setPos(p){
   activePos = p;
-  setActiveTab("tab_pos_", p);
+  refreshActiveVisuals();
   render();
 }
 function setSort(k){
   activeSort = k;
-  setActiveTab("tab_sort_", k);
+  refreshActiveVisuals();
   render();
 }
 
@@ -336,8 +405,7 @@ function render(){
     });
   }
 
-  // Sort
-  rows = rows.slice(); // copy
+  rows = rows.slice(); // copy for sorting
   if(activeSort === "all" || activeSort === "shirt"){
     rows.sort((a,b)=> (a.shirt - b.shirt) || a.player.localeCompare(b.player));
   } else if(activeSort === "age"){
@@ -350,7 +418,7 @@ function render(){
     rows.sort((a,b)=> (b.goals - a.goals) || (b.value - a.value) || a.player.localeCompare(b.player));
   }
 
-  // Summary (✅ بدون أي sort إضافي)
+  // Summary
   const playersCount = rows.length;
   const ages = rows.map(r=>r.age).filter(a=>Number.isFinite(a));
   const avgAge = ages.length ? (ages.reduce((s,x)=>s+x,0)/ages.length) : null;
@@ -409,7 +477,7 @@ Promise.all([
   fetch(scorersURL + "&t=" + Date.now(), {cache:"no-store"}).then(r=>r.text())
 ]).then(([sCSV,gCSV])=>{
 
-  // Goals map: TeamName (col2) + Player Name (col3)
+  // Goals map
   const gRows = parseCSV(gCSV).slice(1);
   goalsMap = {};
   gRows.forEach(r=>{
@@ -431,7 +499,7 @@ Promise.all([
     const nat    = (r[6]||"").trim();
     const foot   = (r[8]||"").trim().toUpperCase();
     const value  = parseMarketValue(r[12]);
-    const posSC  = normPosSC(r[13]); // ✅ FIX
+    const posSC  = normPosSC(r[13]);
 
     const gKey = (club + "||" + player).toLowerCase();
     const goals = goalsMap[gKey] || 0;
@@ -441,10 +509,7 @@ Promise.all([
 
   clubs = [...new Set(all.map(x=>x.club))].sort();
 
-  buildTabs();          // build once
-  setClub("ALL");       // default active
-  setPos("All");        // default
-  setSort("all");       // default
+  buildTabs();
   render();
 
 }).catch(err => console.error("Load error:", err));
