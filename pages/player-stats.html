@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Player Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Cairo', Arial, sans-serif;
+    background: linear-gradient(rgba(15,15,15,0.9), rgba(15,15,15,0.9)), url("../assets/img/standings-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ===== Top Navigation ===== */
+.top-nav {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.top-nav a {
+    text-decoration: none;
+    background: #2b2b2b;
+    color: #fff;
+    padding: 12px 40px;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 800;
+    transition: 0.3s;
+}
+
+.top-nav a:hover {
+    background: #3498db;
+}
+
+/* ===== Main Layout ===== */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+.players {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: start;
+    gap: 30px;
+}
+
+/* ===== Player Box ===== */
+.player-box {
+    text-align: center;
+}
+
+.player-name {
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 15px;
+}
+
+.player-points{
+    margin-top:6px;
+    font-size:14px;
+    font-weight:900;
+    opacity:.95;
+}
+
+/* ===== Video Style ===== */
+.player-video {
+    width: 260px;
+    height: 260px;
+    border-radius: 25px;
+    border: 5px solid #fff;
+    object-fit: cover;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+/* ===== Stats ===== */
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 60px;
+}
+
+.stat-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    background: #1a1a1a;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 20px;
+}
+
+.stat-left {
+    text-align: left;
+    color: #e74c3c;
+    font-weight: 800;
+}
+
+.stat-name {
+    text-align: center;
+    font-weight: 800;
+}
+
+.stat-right {
+    text-align: right;
+    color: #3498db;
+    font-weight: 800;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== Home Button ===== -->
+<div class="top-nav">
+    <a href="../index.html">Home</a>
+</div>
+
+<div class="container">
+    <div class="players">
+
+        <!-- Ahmed -->
+        <div class="player-box">
+            <video class="player-video" autoplay muted loop playsinline>
+                <source src="../assets/video/ahmed.mp4" type="video/mp4">
+            </video>
+            <div class="player-name">Ahmed Ibrahem</div>
+            <div class="player-points" id="p1Points">Points: 0</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats" id="statsBox"></div>
+
+        <!-- Abdoulrahman -->
+        <div class="player-box">
+            <video class="player-video" autoplay muted loop playsinline>
+                <source src="../assets/video/abdoulrahman.mp4" type="video/mp4">
+            </video>
+            <div class="player-name">Abdoulrahman Atef</div>
+            <div class="player-points" id="p2Points">Points: 0</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const standingsURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+
+function parseCSV(text) {
+    return text.trim().split("\n").map(r =>
+        r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, ''))
+    );
+}
+
+fetch(standingsURL + "&t=" + Date.now())
+.then(res => res.text())
+.then(csv => {
+    const rows = parseCSV(csv).slice(1);
+
+    const players = {
+        "Ahmed Ibrahem": { P:0, W:0, D:0, L:0, GS:0, GC:0, PTS:0 },
+        "Abdoulrahman Atef": { P:0, W:0, D:0, L:0, GS:0, GC:0, PTS:0 }
+    };
+
+    rows.forEach(r => {
+        const owner = r[11];
+        if (!players[owner]) return;
+
+        players[owner].P   += Number(r[3]);
+        players[owner].W   += Number(r[4]);
+        players[owner].D   += Number(r[5]);
+        players[owner].L   += Number(r[6]);
+        players[owner].GS  += Number(r[8]);
+        players[owner].GC  += Number(r[9]);
+        players[owner].PTS += Number(r[10]);
+    });
+
+
+    document.getElementById("p1Points").textContent = "Points: " + (players["Ahmed Ibrahem"].PTS || 0);
+    document.getElementById("p2Points").textContent = "Points: " + (players["Abdoulrahman Atef"].PTS || 0);
+
+    const stats = [
+        ["Matches Played", "P"],
+        ["Wins", "W"],
+        ["Draws", "D"],
+        ["Losses", "L"],
+        ["Goals Scored", "GS"],
+        ["Goals Conceded", "GC"],
+        ["Total Points", "PTS"]
+    ];
+
+    const box = document.getElementById("statsBox");
+    stats.forEach(s => {
+        box.innerHTML += `
+        <div class="stat-row">
+            <div class="stat-left">${players["Ahmed Ibrahem"][s[1]]}</div>
+            <div class="stat-name">${s[0]}</div>
+            <div class="stat-right">${players["Abdoulrahman Atef"][s[1]]}</div>
+        </div>`;
+    });
+});
+</script>
+
+</body>
+</html>

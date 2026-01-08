@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Top Scorers</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="../assets/img/fifa26.jpeg">
+
+<style>
+  body{
+    font-family:'Cairo',Arial,sans-serif;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(rgba(15,15,15,.85),rgba(15,15,15,.85)),url("Pele.jpg");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    margin:0;
+  }
+  .page-header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;}
+  .header-logo{height:100px;object-fit:contain;}
+  .logo-box{ text-align:center; cursor:pointer; }
+  .player-points{ margin-top:5px; font-weight:900; font-size:14px; opacity:.95; }
+
+  nav{display:flex;justify-content:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;padding:0 10px;}
+  nav a{
+    text-decoration:none;color:#fff;font-weight:700;padding:10px 25px;border-radius:8px;
+    transition:.3s;background:#2b2b2b;
+  }
+  nav a:hover{background:#3498db;transform:scale(1.05);}
+  nav a.active{background:#3498db;box-shadow:0 4px 8px rgba(0,0,0,.3);}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:0 10px 30px;}
+  h2{text-align:center;margin:10px 0 15px;font-weight:800;}
+
+  .filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 18px; position:relative;}
+  select,input{
+    padding:10px 12px;border-radius:8px;border:0;outline:0;
+    font-family:'Cairo',Arial;
+    min-width:220px;
+  }
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{background:#2b2b2b;padding:10px;font-weight:800;}
+  td{padding:10px 8px;text-align:center;}
+  tr:nth-child(even){background:#1a1a1a;}
+
+  .player-cell{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#3498db;
+    color:#fff;
+    font-weight:800;
+    font-size:12px;
+    line-height:1;
+    box-shadow:0 4px 10px rgba(0,0,0,.25);
+  }
+
+  /* ===== Autocomplete dropdown (custom) ===== */
+  .autocomplete-wrap{ position:relative; }
+  .suggestions{
+    position:absolute;
+    top:calc(100% + 6px);
+    left:0;
+    right:0;
+    background:#1a1a1a;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,.45);
+    z-index:9999;
+    display:none;
+    max-height:260px;
+    overflow-y:auto;
+  }
+  .suggestions.show{ display:block; }
+  .suggestion-item{
+    padding:10px 12px;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+    font-size:14px;
+  }
+  .suggestion-item:hover,
+  .suggestion-item.active{
+    background:#2b2b2b;
+  }
+  .suggestion-left{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    text-align:left;
+  }
+  .suggestion-name{ font-weight:800; }
+  .suggestion-meta{ font-size:12px; opacity:.85; font-weight:600; }
+  .suggestion-goals{
+    background:#3498db;
+    padding:4px 10px;
+    border-radius:999px;
+    font-weight:900;
+    font-size:12px;
+    line-height:1;
+    white-space:nowrap;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="page-header">
+  <div class="logo-box" id="leftBox">
+    <img src="../assets/img/left-logo.png" alt="Left Logo" class="header-logo left">
+    <div class="player-points" id="left-points">Points: 0</div>
+  </div>
+  <div class="logo-box" id="rightBox">
+    <img src="../assets/img/right-logo.png" alt="Right Logo" class="header-logo right">
+    <div class="player-points" id="right-points">Points: 0</div>
+  </div>
+</div>
+
+<nav>
+  <a href="../index.html">Standings</a>
+  <a href="matches.html">Matches</a>
+  <a href="scorers.html" class="active">Scorers</a>
+  <a href="squads.html">Squads</a>
+</nav>
+
+
+<div class="wrap">
+  <h2>Top Scorers</h2>
+
+  <div class="filters">
+    <!-- Wrap input so dropdown anchors correctly -->
+    <div class="autocomplete-wrap">
+      <input
+        id="search"
+        name="playerSearch"
+        placeholder="Search player..."
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <div id="suggestions" class="suggestions" aria-label="Player suggestions"></div>
+    </div>
+
+    <select id="ownerFilter">
+      <option value="">All Owners</option>
+    </select>
+
+    <select id="weekFilter">
+      <option value="">All Weeks</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Player</th>
+        <th>Team</th>
+        <th>Owner</th>
+        <th>Goals</th>
+      </tr>
+    </thead>
+    <tbody id="scorersBody"></tbody>
+  </table>
+</div>
+
+<script>
+/* =========================
+   CSV URL
+========================= */
+const scorersURL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=940156222&single=true&output=csv";
+
+function parseCSV(text) {
+  return text.trim().split("\n").map(row =>
+    row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, "").trim())
+  );
+}
+
+let raw = []; // all goals rows
+let activeSuggestionIndex = -1;
+
+const searchInput = document.getElementById("search");
+const suggestionsBox = document.getElementById("suggestions");
+const ownerFilterEl = document.getElementById("ownerFilter");
+const weekFilterEl  = document.getElementById("weekFilter");
+
+function buildFilters(){
+  const ownerSet = new Set();
+  const weekSet = new Set();
+
+  raw.forEach(r=>{
+    if(r.owner) ownerSet.add(r.owner);
+    if(r.week) weekSet.add(r.week);
+  });
+
+  [...ownerSet].sort().forEach(o=>{
+    const opt=document.createElement("option");
+    opt.value=o; opt.textContent=o;
+    ownerFilterEl.appendChild(opt);
+  });
+
+  [...weekSet]
+    .sort((a,b)=>Number(a)-Number(b))
+    .forEach(w=>{
+      const opt=document.createElement("option");
+      opt.value=w; opt.textContent="Week " + w;
+      weekFilterEl.appendChild(opt);
+    });
+}
+
+function getFilteredRaw(){
+  const q = searchInput.value.trim().toLowerCase();
+  const owner = ownerFilterEl.value;
+  const week  = weekFilterEl.value;
+
+  let filtered = raw.slice();
+  if(owner) filtered = filtered.filter(x => x.owner === owner);
+  if(week)  filtered = filtered.filter(x => String(x.week) === String(week));
+  if(q)     filtered = filtered.filter(x => x.player.toLowerCase().includes(q));
+  return filtered;
+}
+
+function aggregate(rows){
+  // aggregate by Player + Team + Owner
+  const map = new Map();
+  rows.forEach(g=>{
+    const key = `${g.player}||${g.team}||${g.owner}`;
+    if(!map.has(key)){
+      map.set(key, { player:g.player, team:g.team, owner:g.owner, goals:0 });
+    }
+    map.get(key).goals += 1;
+  });
+
+  return [...map.values()]
+    .sort((a,b)=> (b.goals - a.goals) || a.player.localeCompare(b.player));
+}
+
+function render(){
+  const tbody = document.getElementById("scorersBody");
+  const filteredRaw = getFilteredRaw();
+  const view = aggregate(filteredRaw);
+
+  const topGoals = view.length ? view[0].goals : 0;
+
+  tbody.innerHTML = "";
+  view.forEach((row, i)=>{
+    const isTop = topGoals > 0 && row.goals === topGoals;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
+        <td>
+          <div class="player-cell">
+            <span>${row.player}</span>
+            ${isTop ? `<span class="badge">🥇 Top Scorer</span>` : ``}
+          </div>
+        </td>
+        <td>${row.team}</td>
+        <td>${row.owner}</td>
+        <td>${row.goals}</td>
+      </tr>`;
+  });
+}
+
+/* =========================
+   Custom Autocomplete
+========================= */
+function closeSuggestions(){
+  suggestionsBox.classList.remove("show");
+  suggestionsBox.innerHTML = "";
+  activeSuggestionIndex = -1;
+}
+
+function openSuggestions(){
+  if(suggestionsBox.children.length > 0){
+    suggestionsBox.classList.add("show");
+  }
+}
+
+function renderSuggestions(){
+  // suggestions are based on CURRENT filters (Owner/Week) but BEFORE search filtering
+  // so they help you find players inside the selected filters.
+  const owner = ownerFilterEl.value;
+  const week  = weekFilterEl.value;
+  const q = searchInput.value.trim().toLowerCase();
+
+  // if no query, show nothing (you can change this to show top players)
+  if(!q){
+    closeSuggestions();
+    return;
+  }
+
+  let base = raw.slice();
+  if(owner) base = base.filter(x => x.owner === owner);
+  if(week)  base = base.filter(x => String(x.week) === String(week));
+
+  const aggregated = aggregate(base);
+
+  // Match by player name (starts with gets priority)
+  const matched = aggregated
+    .filter(x => x.player.toLowerCase().includes(q))
+    .sort((a,b)=>{
+      const aName = a.player.toLowerCase();
+      const bName = b.player.toLowerCase();
+      const aStarts = aName.startsWith(q) ? 1 : 0;
+      const bStarts = bName.startsWith(q) ? 1 : 0;
+      if(bStarts !== aStarts) return bStarts - aStarts;
+      if(b.goals !== a.goals) return b.goals - a.goals;
+      return a.player.localeCompare(b.player);
+    })
+    .slice(0, 8);
+
+  suggestionsBox.innerHTML = "";
+  activeSuggestionIndex = -1;
+
+  if(matched.length === 0){
+    closeSuggestions();
+    return;
+  }
+
+  matched.forEach((s, idx)=>{
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+    item.dataset.index = String(idx);
+    item.innerHTML = `
+      <div class="suggestion-left">
+        <div class="suggestion-name">${s.player}</div>
+        <div class="suggestion-meta">${s.team} • ${s.owner}</div>
+      </div>
+      <div class="suggestion-goals">${s.goals}G</div>
+    `;
+
+    // use mousedown so click doesn't lose focus before selection
+    item.addEventListener("mousedown", (e)=>{
+      e.preventDefault();
+      selectSuggestion(s.player);
+    });
+
+    suggestionsBox.appendChild(item);
+  });
+
+  openSuggestions();
+}
+
+function highlightSuggestion(index){
+  const items = Array.from(suggestionsBox.querySelectorAll(".suggestion-item"));
+  items.forEach(el => el.classList.remove("active"));
+  if(index >= 0 && index < items.length){
+    items[index].classList.add("active");
+    activeSuggestionIndex = index;
+  } else {
+    activeSuggestionIndex = -1;
+  }
+}
+
+function selectSuggestion(playerName){
+  searchInput.value = playerName;
+  closeSuggestions();
+  render();
+}
+
+/* =========================
+   Events
+========================= */
+searchInput.addEventListener("input", ()=>{
+  render();            // keep table responsive
+  renderSuggestions(); // show custom suggestions
+});
+
+searchInput.addEventListener("focus", ()=>{
+  renderSuggestions();
+});
+
+searchInput.addEventListener("keydown", (e)=>{
+  const items = Array.from(suggestionsBox.querySelectorAll(".suggestion-item"));
+  if(!suggestionsBox.classList.contains("show") || items.length === 0){
+    return;
+  }
+
+  if(e.key === "ArrowDown"){
+    e.preventDefault();
+    const next = activeSuggestionIndex + 1;
+    highlightSuggestion(next >= items.length ? 0 : next);
+  } else if(e.key === "ArrowUp"){
+    e.preventDefault();
+    const prev = activeSuggestionIndex - 1;
+    highlightSuggestion(prev < 0 ? items.length - 1 : prev);
+  } else if(e.key === "Enter"){
+    if(activeSuggestionIndex >= 0 && activeSuggestionIndex < items.length){
+      e.preventDefault();
+      const chosen = items[activeSuggestionIndex].querySelector(".suggestion-name")?.textContent;
+      if(chosen) selectSuggestion(chosen);
+    }
+  } else if(e.key === "Escape"){
+    closeSuggestions();
+  }
+});
+
+// close suggestions when clicking outside
+document.addEventListener("click", (e)=>{
+  const wrap = document.querySelector(".autocomplete-wrap");
+  if(!wrap.contains(e.target)){
+    closeSuggestions();
+  }
+});
+
+// Update suggestions & table when filters change
+ownerFilterEl.addEventListener("change", ()=>{
+  render();
+  renderSuggestions();
+});
+weekFilterEl.addEventListener("change", ()=>{
+  render();
+  renderSuggestions();
+});
+
+fetch(scorersURL + "&t=" + Date.now(), { cache:"no-store" })
+.then(res => res.text())
+.then(csv=>{
+  const data = parseCSV(csv);
+  const rows = data.slice(1); // skip header
+
+  raw = rows
+    .map(r=>({
+      week: r[0],
+      matchId: r[1],
+      team: r[2],
+      player: r[3],
+      time: r[4],   // موجود لو احتجته بعدين
+      owner: r[5]
+    }))
+    .filter(x => x.player && x.team); // ignore empty rows
+
+  buildFilters();
+  render();
+})
+.catch(err => console.error("Error loading scorers sheet:", err));
+
+/* ===== Owner Points under logos + link to player-stats ===== */
+const standingsPointsURL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=1129539507&single=true&output=csv";
+
+function loadOwnerPoints(){
+  fetch(standingsPointsURL + "&t=" + Date.now(), { cache:"no-store" })
+    .then(r=>r.text())
+    .then(csv=>{
+      const rows = parseCSV(csv).slice(1);
+      const pointsByOwner = {};
+      rows.forEach(r=>{
+        const owner = (r[11]||"").trim();
+        const pts = Number(r[10]) || 0;
+        if(!owner) return;
+        pointsByOwner[owner] = (pointsByOwner[owner]||0) + pts;
+      });
+
+      document.getElementById("left-points").textContent =
+        `Points: ${pointsByOwner["Ahmed Ibrahem"] || 0}`;
+      document.getElementById("right-points").textContent =
+        `Points: ${pointsByOwner["Abdoulrahman Atef"] || 0}`;
+    })
+    .catch(err=>console.error("Owner points load error:", err));
+}
+
+document.getElementById("leftBox").addEventListener("click", ()=>{ window.location.href = "player-stats.html"; });
+document.getElementById("rightBox").addEventListener("click", ()=>{ window.location.href = "player-stats.html"; });
+
+loadOwnerPoints();
+
+</script>
+
+</body>
+</html>
