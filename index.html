@@ -11,7 +11,15 @@
 .page-header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;}
 .logo-box{text-align:center;cursor:pointer;}
 .header-logo{height:100px;object-fit:contain;}
-.player-points{margin-top:5px;font-size:16px;font-weight:700}
+.player-points{
+  margin-top:5px;
+  font-family:'Cairo', Arial, sans-serif;
+  font-weight:800;
+  font-size:14px;
+  color:#fff;
+  opacity:.95;
+}
+
 
 /* ===== NAV ===== */
 nav{display:flex;justify-content:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
@@ -749,6 +757,14 @@ document.querySelector(".rules-toggle").addEventListener("click", function() {
   content.classList.toggle("open");
   this.innerHTML = content.classList.contains("open") ? "Rules ▲" : "Rules ▼";
 });
+// ✅ Go to player comparison page when clicking the top logos
+document.querySelectorAll(".logo-box").forEach(box=>{
+  box.addEventListener("click", ()=>{
+    window.location.href = "pages/player-stats.html"; // صفحة المقارنة
+  });
+});
+
+  
 </script>
 
 </body>
