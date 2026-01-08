@@ -383,7 +383,7 @@ fetch(squadsURL + "&t=" + Date.now(), { cache:"no-store" })
       const nat = r[6] || "";
       const height = r[7] || "";
       const foot = (r[8] || "").toUpperCase();
-      const value = parseMarketValue(r[13]);
+      const value = parseMarketValue(r[12]);
 
       return { club, shirt, player, pos, age, nat, height, foot, value };
     }).filter(x => x.club && x.player);
