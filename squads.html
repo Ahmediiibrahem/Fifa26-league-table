@@ -17,24 +17,26 @@ body{
   background-attachment:fixed;
 }
 
-/* ===== Header / Nav ===== */
+/* Header / Nav */
 .page-header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;}
-.header-logo{height:100px}
-nav{display:flex;justify-content:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
-nav a{color:#fff;text-decoration:none;background:#2b2b2b;padding:10px 25px;border-radius:8px;font-weight:800}
-nav a.active,nav a:hover{background:#3498db}
+.header-logo{height:100px;object-fit:contain;}
+nav{display:flex;justify-content:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;padding:0 10px;}
+nav a{color:#fff;text-decoration:none;background:#2b2b2b;padding:10px 25px;border-radius:8px;font-weight:800;transition:.2s}
+nav a.active,nav a:hover{background:#3498db;}
 
-/* ===== Layout ===== */
+/* Layout */
 .wrap{max-width:1200px;margin:auto;padding:0 10px 30px}
-h2{text-align:center;margin:10px 0 14px}
+h2{text-align:center;margin:10px 0 14px;font-weight:900}
 
-/* ===== Tabs ===== */
-.tabs-grid{
+/* TEAM TABS: 2 rows (8 columns) */
+.club-tabs{
   display:grid;
-  grid-template-columns:repeat(8,1fr);
+  grid-template-columns:repeat(8, 1fr);
   gap:10px;
+  margin:12px 0;
 }
-@media(max-width:900px){.tabs-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){ .club-tabs{grid-template-columns:repeat(4,1fr)} }
+@media(max-width:520px){ .club-tabs{grid-template-columns:repeat(2,1fr)} }
 
 .tab{
   background:#2b2b2b;
@@ -43,44 +45,44 @@ h2{text-align:center;margin:10px 0 14px}
   text-align:center;
   cursor:pointer;
   transition:.2s;
-  border:1px solid rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.10);
+  user-select:none;
 }
 .tab:hover{background:#3498db}
-.tab.active{background:#3498db;box-shadow:0 6px 14px rgba(0,0,0,.4)}
+.tab.active{background:#3498db;box-shadow:0 6px 14px rgba(0,0,0,.35);border-color:rgba(52,152,219,.6)}
 
-.tab img{
-  width:28px;
-  height:28px;
-  object-fit:contain;
+.tab img{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.tab.all-teams{
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;
+  gap:8px;
 }
 
-/* ===== Dividers ===== */
+/* Divider */
 .divider{height:1px;background:rgba(255,255,255,.15);margin:12px 0}
 
-/* ===== Row Tabs ===== */
+/* Row Tabs */
 .tabs-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 
-/* ===== Search ===== */
+/* Search */
 .search-box{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display:flex;align-items:center;gap:10px;
   background:rgba(0,0,0,.4);
   border-radius:14px;
   padding:10px 14px;
   max-width:700px;
-  margin:auto;
+  margin:0 auto 14px;
+  border:1px solid rgba(255,255,255,.10);
 }
 .search-box input{
   width:100%;
-  background:none;
-  border:0;
-  outline:0;
-  color:#fff;
-  font-weight:800;
+  background:none;border:0;outline:0;
+  color:#fff;font-weight:900;
+  font-family:'Cairo',Arial;
+  font-size:14px;
 }
 
-/* ===== Summary ===== */
+/* Summary */
 .summary{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -92,36 +94,31 @@ h2{text-align:center;margin:10px 0 14px}
   background:rgba(0,0,0,.4);
   border-radius:14px;
   padding:12px;
+  border:1px solid rgba(255,255,255,.10);
 }
-.card .k{font-size:12px;opacity:.8}
-.card .v{font-size:18px;font-weight:900}
+.card .k{font-size:12px;opacity:.8;font-weight:700}
+.card .v{font-size:18px;font-weight:900;margin-top:4px;word-break:break-word}
 
-/* ===== Table ===== */
+/* Table */
 .table-wrap{overflow:auto;border-radius:12px}
-table{width:100%;border-collapse:collapse}
-th{background:#2b2b2b;padding:10px}
-td{padding:8px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#2b2b2b;padding:10px;font-weight:900;white-space:nowrap}
+td{padding:8px;text-align:center;white-space:nowrap}
 tr:nth-child(even){background:#1a1a1a}
 
-.player-cell{display:flex;align-items:center;gap:10px;text-align:left}
-.player-cell img{width:22px;height:22px;object-fit:contain}
+.player-cell{display:flex;align-items:center;gap:10px;text-align:left;min-width:260px}
+.player-cell img{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
 .muted{font-size:12px;opacity:.8}
-
-.pill{
-  padding:4px 10px;
-  border-radius:999px;
-  background:rgba(52,152,219,.25);
-  font-size:12px;
-  font-weight:800;
-}
+.pill{padding:4px 10px;border-radius:999px;background:rgba(52,152,219,.25);font-size:12px;font-weight:900}
+.empty{text-align:center;margin-top:14px;opacity:.85}
 </style>
 </head>
 
 <body>
 
 <div class="page-header">
-  <img src="left-logo.png" class="header-logo">
-  <img src="right-logo.png" class="header-logo">
+  <img src="left-logo.png" class="header-logo" alt="">
+  <img src="right-logo.png" class="header-logo" alt="">
 </div>
 
 <nav>
@@ -134,173 +131,325 @@ tr:nth-child(even){background:#1a1a1a}
 </nav>
 
 <div class="wrap">
-<h2>Squads</h2>
+  <h2>Squads</h2>
 
-<!-- Teams -->
-<div id="clubTabs" class="tabs-grid"></div>
+  <!-- Clubs -->
+  <div id="clubTabs" class="club-tabs"></div>
 
-<div class="divider"></div>
+  <div class="divider"></div>
 
-<!-- Position -->
-<div id="posTabs" class="tabs-row"></div>
+  <!-- Position -->
+  <div id="posTabs" class="tabs-row"></div>
 
-<div class="divider"></div>
+  <div class="divider"></div>
 
-<!-- Sort -->
-<div id="sortTabs" class="tabs-row"></div>
+  <!-- Sort -->
+  <div id="sortTabs" class="tabs-row"></div>
 
-<div class="divider"></div>
+  <div class="divider"></div>
 
-<!-- Search -->
-<div class="search-box">
-  🔍 <input id="search" placeholder="Search: name, age, shirt, goals, value..." />
-</div>
+  <!-- Search (no browser suggestions) -->
+  <div class="search-box">
+    🔍
+    <input id="search" name="searchbox_no_suggest_123" autocomplete="off"
+           autocapitalize="off" autocorrect="off" spellcheck="false"
+           placeholder="Search: name, age, shirt, goals, value, club..." />
+  </div>
 
-<div class="summary">
-  <div class="card"><div class="k">Players</div><div class="v" id="sumPlayers">-</div></div>
-  <div class="card"><div class="k">Average Age</div><div class="v" id="sumAvgAge">-</div></div>
-  <div class="card"><div class="k">Total Market Value</div><div class="v" id="sumTotalValue">-</div></div>
-  <div class="card"><div class="k">Top Value Player</div><div class="v" id="sumMVP">-</div></div>
-</div>
+  <div class="summary">
+    <div class="card"><div class="k">Players</div><div class="v" id="sumPlayers">-</div></div>
+    <div class="card"><div class="k">Average Age</div><div class="v" id="sumAvgAge">-</div></div>
+    <div class="card"><div class="k">Total Market Value</div><div class="v" id="sumTotalValue">-</div></div>
+    <div class="card"><div class="k">Top Value Player</div><div class="v" id="sumMVP">-</div></div>
+  </div>
 
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-  <th>#</th>
-  <th>Player</th>
-  <th>Pos</th>
-  <th>Age</th>
-  <th>Nat</th>
-  <th>Foot</th>
-  <th>Market</th>
-  <th>Goals</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
-</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>Pos</th>
+          <th>PosSC</th>
+          <th>Age</th>
+          <th>Nat</th>
+          <th>Foot</th>
+          <th>Market</th>
+          <th>Goals</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div id="empty" class="empty" style="display:none;">No players found.</div>
 </div>
 
 <script>
-const squadsURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=609829485&single=true&output=csv";
-const scorersURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=940156222&single=true&output=csv";
+const squadsURL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=609829485&single=true&output=csv";
+const scorersURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=940156222&single=true&output=csv";
 
 function parseCSV(t){
-  return t.trim().split("\n").map(r=>r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c=>c.replace(/^"|"$/g,"").trim()));
+  return t.trim().split("\n").map(r =>
+    r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g,"").trim())
+  );
 }
-const logoSrc=t=>`logos/${encodeURIComponent(t)}.png`;
+const logoSrc = (t)=> `logos/${encodeURIComponent(t)}.png`;
 
-let all=[],clubs=[],goalsMap={};
-let activeClub="ALL",activePos="All",activeSort="shirt";
-
-function makeTab(content,active,cb){
-  const d=document.createElement("div");
-  d.className="tab"+(active?" active":"");
-  if(typeof content==="string") d.textContent=content;
-  else d.appendChild(content);
-  d.onclick=cb;
-  return d;
+function parseMarketValue(cell){
+  if(cell == null) return 0;
+  const s = String(cell).toLowerCase().replace(/,/g,"").trim();
+  const m = s.match(/(\d+(\.\d+)?)/);
+  return m ? Number(m[1]) : 0;
+}
+function fmtM(v){
+  const n = Math.round((Number(v||0))*10)/10;
+  return String(n);
 }
 
+/* ✅ normalize PositionSC to exact: GK / Def / Mid / Att */
+function normPosSC(x){
+  const s = String(x||"").trim().toLowerCase();
+  if(!s) return "";
+  if(s === "gk" || s.includes("goal")) return "GK";
+  if(s === "def" || s === "df" || s.includes("back")) return "Def";
+  if(s === "mid" || s === "mf" || s.includes("mid")) return "Mid";
+  if(s === "att" || s === "fw" || s.includes("for") || s.includes("attack")) return "Att";
+  // fallback: capitalize first
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* State */
+let all = [];
+let clubs = [];
+let goalsMap = {}; // key: team||player => goals
+
+let activeClub = "ALL";
+let activePos  = "All";
+let activeSort = "all"; // all/shirt/age/value/name/goals
+
+/* Tabs builders (build once) */
 function buildTabs(){
-  const ct=document.getElementById("clubTabs");
-  ct.innerHTML="";
-  ct.appendChild(makeTab("All Teams",activeClub==="ALL",()=>{activeClub="ALL";render();buildTabs()}));
+  // Club tabs
+  const ct = document.getElementById("clubTabs");
+  ct.innerHTML = "";
+
+  const allTeamsTab = document.createElement("div");
+  allTeamsTab.className = "tab all-teams active";
+  allTeamsTab.id = "tab_club_ALL";
+  allTeamsTab.innerHTML = "🌍 <span>All Teams</span>";
+  allTeamsTab.onclick = ()=> setClub("ALL");
+  ct.appendChild(allTeamsTab);
+
   clubs.forEach(c=>{
-    const img=document.createElement("img");
-    img.src=logoSrc(c);
-    ct.appendChild(makeTab(img,activeClub===c,()=>{activeClub=c;render();buildTabs()}));
+    const tab = document.createElement("div");
+    tab.className = "tab";
+    tab.id = "tab_club_" + cssSafeId(c);
+
+    const img = document.createElement("img");
+    img.src = logoSrc(c);
+    img.alt = c;
+    img.onerror = function(){ this.style.display="none"; };
+
+    tab.appendChild(img);
+    tab.onclick = ()=> setClub(c);
+    ct.appendChild(tab);
   });
 
-  const pt=document.getElementById("posTabs");
-  pt.innerHTML="";
+  // Position tabs
+  const pt = document.getElementById("posTabs");
+  pt.innerHTML = "";
   ["All","GK","Def","Mid","Att"].forEach(p=>{
-    pt.appendChild(makeTab(p,activePos===p,()=>{activePos=p;render();buildTabs()}));
+    const tab = document.createElement("div");
+    tab.className = "tab" + (p===activePos ? " active":"");
+    tab.id = "tab_pos_" + p;
+    tab.textContent = p;
+    tab.onclick = ()=> setPos(p);
+    pt.appendChild(tab);
   });
 
-  const st=document.getElementById("sortTabs");
-  st.innerHTML="";
-  [["shirt","#"],["age","Age"],["value","Value"],["name","Name"]].forEach(s=>{
-    st.appendChild(makeTab(s[1],activeSort===s[0],()=>{activeSort=s[0];render();buildTabs()}));
+  // Sort tabs (✅ includes All + Goals)
+  const st = document.getElementById("sortTabs");
+  st.innerHTML = "";
+
+  const sorts = [
+    {k:"all",   label:"All"},
+    {k:"shirt", label:"Shirt #"},
+    {k:"age",   label:"Age"},
+    {k:"value", label:"Value"},
+    {k:"name",  label:"Name"},
+    {k:"goals", label:"Goals"}
+  ];
+
+  sorts.forEach(s=>{
+    const tab = document.createElement("div");
+    tab.className = "tab" + (s.k===activeSort ? " active":"");
+    tab.id = "tab_sort_" + s.k;
+    tab.textContent = s.label;
+    tab.onclick = ()=> setSort(s.k);
+    st.appendChild(tab);
   });
 }
 
-function render(){
-  let rows=[...all];
-  const q=document.getElementById("search").value.toLowerCase();
+function cssSafeId(s){
+  return btoa(unescape(encodeURIComponent(String(s)))).replace(/=+/g,"");
+}
 
-  if(activeClub!=="ALL") rows=rows.filter(r=>r.club===activeClub);
-  if(activePos!=="All") rows=rows.filter(r=>r.posSC===activePos);
+function setActiveTab(prefix, id){
+  document.querySelectorAll(`[id^="${prefix}"]`).forEach(el=> el.classList.remove("active"));
+  const target = document.getElementById(prefix + id);
+  if(target) target.classList.add("active");
+}
+
+function setClub(c){
+  activeClub = c;
+  setActiveTab("tab_club_", c==="ALL" ? "ALL" : cssSafeId(c));
+  render();
+}
+function setPos(p){
+  activePos = p;
+  setActiveTab("tab_pos_", p);
+  render();
+}
+function setSort(k){
+  activeSort = k;
+  setActiveTab("tab_sort_", k);
+  render();
+}
+
+/* Render */
+function render(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  let rows = all;
+
+  if(activeClub !== "ALL") rows = rows.filter(r=> r.club === activeClub);
+  if(activePos !== "All")  rows = rows.filter(r=> r.posSC === activePos);
 
   if(q){
-    rows=rows.filter(r=>
-      `${r.player} ${r.club} ${r.age} ${r.shirt} ${r.value} ${r.goals}`.toLowerCase().includes(q)
-    );
+    rows = rows.filter(r=>{
+      const blob = [
+        r.player, r.club, r.pos, r.posSC,
+        r.age, r.shirt, r.nat, r.foot,
+        r.value, r.goals
+      ].join(" ").toLowerCase();
+      return blob.includes(q);
+    });
   }
 
-  rows.sort((a,b)=>{
-    if(activeSort==="shirt") return a.shirt-b.shirt;
-    if(activeSort==="age") return (a.age??99)-(b.age??99);
-    if(activeSort==="value") return b.value-a.value;
-    if(activeSort==="name") return a.player.localeCompare(b.player);
+  // Sort
+  rows = rows.slice(); // copy
+  if(activeSort === "all" || activeSort === "shirt"){
+    rows.sort((a,b)=> (a.shirt - b.shirt) || a.player.localeCompare(b.player));
+  } else if(activeSort === "age"){
+    rows.sort((a,b)=> ((a.age ?? 999) - (b.age ?? 999)) || a.player.localeCompare(b.player));
+  } else if(activeSort === "value"){
+    rows.sort((a,b)=> (b.value - a.value) || a.player.localeCompare(b.player));
+  } else if(activeSort === "name"){
+    rows.sort((a,b)=> a.player.localeCompare(b.player));
+  } else if(activeSort === "goals"){
+    rows.sort((a,b)=> (b.goals - a.goals) || (b.value - a.value) || a.player.localeCompare(b.player));
+  }
+
+  // Summary (✅ بدون أي sort إضافي)
+  const playersCount = rows.length;
+  const ages = rows.map(r=>r.age).filter(a=>Number.isFinite(a));
+  const avgAge = ages.length ? (ages.reduce((s,x)=>s+x,0)/ages.length) : null;
+  const totalValue = rows.reduce((s,r)=> s + (r.value||0), 0);
+
+  let mvpName = "-";
+  let maxV = -1;
+  rows.forEach(r=>{
+    if((r.value||0) > maxV){ maxV = r.value||0; mvpName = r.player; }
   });
 
-  document.getElementById("sumPlayers").textContent=rows.length;
-  document.getElementById("sumAvgAge").textContent=rows.length?Math.round(rows.reduce((s,r)=>s+(r.age||0),0)/rows.length):"-";
-  document.getElementById("sumTotalValue").textContent=rows.reduce((s,r)=>s+r.value,0)+" M";
-  document.getElementById("sumMVP").textContent=rows.sort((a,b)=>b.value-a.value)[0]?.player||"-";
+  document.getElementById("sumPlayers").textContent = playersCount ? playersCount : "-";
+  document.getElementById("sumAvgAge").textContent  = avgAge ? (Math.round(avgAge*10)/10) : "-";
+  document.getElementById("sumTotalValue").textContent = playersCount ? `${fmtM(totalValue)} M` : "-";
+  document.getElementById("sumMVP").textContent = playersCount ? `${mvpName} (${fmtM(maxV)} M)` : "-";
 
-  const tb=document.getElementById("tbody");
-  tb.innerHTML="";
+  // Table
+  const tb = document.getElementById("tbody");
+  const empty = document.getElementById("empty");
+  tb.innerHTML = "";
+
+  if(rows.length === 0){
+    empty.style.display="block";
+    return;
+  }
+  empty.style.display="none";
+
   rows.forEach(r=>{
-    tb.innerHTML+=`
-      <tr>
-        <td>${r.shirt}</td>
-        <td class="player-cell"><img src="${logoSrc(r.club)}"><div><b>${r.player}</b><div class="muted">${r.club}</div></div></td>
-        <td>${r.pos}</td>
-        <td>${r.age||"-"}</td>
-        <td>${r.nat}</td>
-        <td>${r.foot?`<span class="pill">${r.foot}</span>`:""}</td>
-        <td>${r.value}</td>
-        <td>${r.goals}</td>
-      </tr>`;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.shirt || ""}</td>
+      <td>
+        <div class="player-cell">
+          <img src="${logoSrc(r.club)}" alt="${r.club}" onerror="this.style.display='none'">
+          <div>
+            <div style="font-weight:900">${r.player}</div>
+            <div class="muted">${r.club}</div>
+          </div>
+        </div>
+      </td>
+      <td>${r.pos || ""}</td>
+      <td>${r.posSC || ""}</td>
+      <td>${Number.isFinite(r.age) ? r.age : "-"}</td>
+      <td>${r.nat || ""}</td>
+      <td>${r.foot ? `<span class="pill">${r.foot}</span>` : ""}</td>
+      <td>${fmtM(r.value)}</td>
+      <td>${r.goals || 0}</td>
+    `;
+    tb.appendChild(tr);
   });
 }
 
+/* Load */
 Promise.all([
-  fetch(squadsURL).then(r=>r.text()),
-  fetch(scorersURL).then(r=>r.text())
+  fetch(squadsURL + "&t=" + Date.now(), {cache:"no-store"}).then(r=>r.text()),
+  fetch(scorersURL + "&t=" + Date.now(), {cache:"no-store"}).then(r=>r.text())
 ]).then(([sCSV,gCSV])=>{
-  const g=parseCSV(gCSV).slice(1);
-  g.forEach(r=>{
-    const k=(r[2]+"||"+r[3]).toLowerCase();
-    goalsMap[k]=(goalsMap[k]||0)+1;
+
+  // Goals map: TeamName (col2) + Player Name (col3)
+  const gRows = parseCSV(gCSV).slice(1);
+  goalsMap = {};
+  gRows.forEach(r=>{
+    const team = (r[2]||"").trim();
+    const player = (r[3]||"").trim();
+    if(!team || !player) return;
+    const key = (team + "||" + player).toLowerCase();
+    goalsMap[key] = (goalsMap[key] || 0) + 1;
   });
 
-  const rows=parseCSV(sCSV).slice(1);
-  all=rows.map(r=>{
-    const club=r[0],player=r[2];
-    return{
-      club,
-      shirt:+r[1]||0,
-      player,
-      pos:r[3],
-      age:+r[5]||null,
-      nat:r[6],
-      foot:r[8],
-      value:+r[12]||0,
-      posSC:r[13],
-      goals:goalsMap[(club+"||"+player).toLowerCase()]||0
-    };
-  });
+  // Squads
+  const rows = parseCSV(sCSV).slice(1);
+  all = rows.map(r=>{
+    const club   = (r[0]||"").trim();
+    const player = (r[2]||"").trim();
+    const shirt  = Number(r[1]) || 0;
+    const pos    = (r[3]||"").trim();
+    const age    = Number(r[5]) || null;
+    const nat    = (r[6]||"").trim();
+    const foot   = (r[8]||"").trim().toUpperCase();
+    const value  = parseMarketValue(r[12]);
+    const posSC  = normPosSC(r[13]); // ✅ FIX
 
-  clubs=[...new Set(all.map(r=>r.club))];
-  buildTabs();
+    const gKey = (club + "||" + player).toLowerCase();
+    const goals = goalsMap[gKey] || 0;
+
+    return { club, player, shirt, pos, age, nat, foot, value, posSC, goals };
+  }).filter(x=> x.club && x.player);
+
+  clubs = [...new Set(all.map(x=>x.club))].sort();
+
+  buildTabs();          // build once
+  setClub("ALL");       // default active
+  setPos("All");        // default
+  setSort("all");       // default
   render();
-});
 
-document.getElementById("search").addEventListener("input",render);
+}).catch(err => console.error("Load error:", err));
+
+document.getElementById("search").addEventListener("input", render);
 </script>
 
 </body>
