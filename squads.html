@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Squads</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="fifa26.jpeg">
+
+<style>
+  body{
+    margin:0;
+    font-family:'Cairo',Arial,sans-serif;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(rgba(15,15,15,.85),rgba(15,15,15,.85)),url("standings-bg.jpg");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+  }
+
+  .page-header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;}
+  .header-logo{height:100px;object-fit:contain;}
+
+  nav{display:flex;justify-content:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;padding:0 10px;}
+  nav a{
+    text-decoration:none;color:#fff;font-weight:700;padding:10px 25px;border-radius:8px;
+    transition:.3s;background:#2b2b2b;
+  }
+  nav a:hover{background:#3498db;transform:scale(1.05);}
+  nav a.active{background:#3498db;box-shadow:0 4px 8px rgba(0,0,0,.3);}
+
+  .wrap{max-width:1150px;margin:0 auto;padding:0 10px 30px;}
+  h2{text-align:center;margin:10px 0 14px;font-weight:800;}
+
+  .filters{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:10px 0 14px;
+  }
+  select,input{
+    padding:10px 12px;border-radius:10px;border:0;outline:0;
+    font-family:'Cairo',Arial;
+    min-width:220px;
+  }
+
+  .summary{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin:10px 0 16px;
+  }
+  @media (max-width: 900px){
+    .summary{grid-template-columns:repeat(2,1fr);}
+  }
+  .card{
+    background:rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:12px 12px;
+  }
+  .card .k{font-size:12px;opacity:.85;font-weight:700;}
+  .card .v{font-size:18px;font-weight:900;margin-top:4px;word-break:break-word;}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{background:#2b2b2b;padding:10px;font-weight:800;text-align:center;}
+  td{padding:10px 8px;text-align:center;}
+  tr:nth-child(even){background:#1a1a1a;}
+
+  /* Player cell */
+  .player-cell{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:10px;
+    text-align:left;
+  }
+  .mini-logo{
+    width:22px;height:22px;object-fit:contain;
+    filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
+    flex:0 0 auto;
+  }
+  .player-name{
+    font-weight:900;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .muted{
+    opacity:.85;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  /* Mobile: make table scrollable */
+  .table-wrap{
+    width:100%;
+    overflow:auto;
+    border-radius:12px;
+  }
+
+  /* little badge for foot */
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(52,152,219,.18);
+  }
+
+  .empty{
+    text-align:center;
+    margin-top:14px;
+    opacity:.85;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="page-header">
+  <img src="left-logo.png" alt="Left Logo" class="header-logo">
+  <img src="right-logo.png" alt="Right Logo" class="header-logo">
+</div>
+
+<nav>
+  <a href="index.html">Standings</a>
+  <a href="matches.html">Results</a>
+  <a href="upcoming.html">Upcoming</a>
+  <a href="team-stats.html">Stats</a>
+  <a href="scorers.html">Scorers</a>
+  <a href="squads.html" class="active">Squads</a>
+</nav>
+
+<div class="wrap">
+  <h2>Squads</h2>
+
+  <div class="filters">
+    <select id="clubFilter">
+      <option value="">Select Club</option>
+    </select>
+
+    <select id="posFilter">
+      <option value="">All Positions</option>
+      <option value="GK">GK</option>
+      <option value="DF">DF</option>
+      <option value="MF">MF</option>
+      <option value="FW">FW</option>
+    </select>
+
+    <select id="sortBy">
+      <option value="shirt_asc">Sort: Shirt # (ASC)</option>
+      <option value="value_desc">Sort: Market Value (DESC)</option>
+      <option value="age_asc">Sort: Age (ASC)</option>
+      <option value="name_asc">Sort: Name (A→Z)</option>
+    </select>
+
+    <input id="search" placeholder="Search player..." />
+  </div>
+
+  <div class="summary">
+    <div class="card"><div class="k">Players</div><div class="v" id="sumPlayers">-</div></div>
+    <div class="card"><div class="k">Average Age</div><div class="v" id="sumAvgAge">-</div></div>
+    <div class="card"><div class="k">Total Market Value</div><div class="v" id="sumTotalValue">-</div></div>
+    <div class="card"><div class="k">Most Valuable Player</div><div class="v" id="sumMVP">-</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>Pos</th>
+          <th>Age</th>
+          <th>Nat.</th>
+          <th>Height</th>
+          <th>Foot</th>
+          <th>Market Value (M)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div id="empty" class="empty" style="display:none;">No players found.</div>
+</div>
+
+<script>
+/* =========================
+   CSV SOURCE
+========================= */
+const squadsURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT54W8eLRnu7YjOYR49uv-FWsBL1VZR3JUptdsdaP7gYmVIyrtHEmoOd0ZR0uaAijzMXbAhmweN1_5n/pub?gid=609829485&single=true&output=csv";
+
+/* =========================
+   Helpers
+========================= */
+function parseCSV(text){
+  return text.trim().split("\n").map(row =>
+    row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, "").trim())
+  );
+}
+
+function teamLogoSrc(clubName){
+  // نفس فولدر logos اللي عندك
+  return `logos/${encodeURIComponent(clubName)}.png`;
+}
+
+function parseAge(cell){
+  // يدعم: "01/01/1999 (25)" أو "1999-01-01 / 25" أو "25"
+  if(cell == null) return null;
+  const s = String(cell).trim();
+  // (25)
+  const m1 = s.match(/\((\d{1,2})\)/);
+  if(m1) return Number(m1[1]);
+  // / 25
+  const m2 = s.match(/\/\s*(\d{1,2})\s*$/);
+  if(m2) return Number(m2[1]);
+  // just number
+  const m3 = s.match(/^\d{1,2}$/);
+  if(m3) return Number(m3[0]);
+  return null;
+}
+
+function parseMarketValue(cell){
+  // العمود عندك: Market value( M) غالباً رقم — بس نخليه robust
+  // يدعم: "120", "120.5", "€120.5m", "120m"
+  if(cell == null) return 0;
+  const s = String(cell).toLowerCase().replace(/,/g,"").trim();
+  const m = s.match(/(\d+(\.\d+)?)/);
+  return m ? Number(m[1]) : 0;
+}
+
+function normPos(p){
+  // تحويل positions لأنواع ثابتة: GK / DF / MF / FW
+  const s = String(p || "").toUpperCase();
+  if(!s) return "";
+  if(s.includes("GK")) return "GK";
+  if(s.includes("CB") || s.includes("LB") || s.includes("RB") || s.includes("DF")) return "DF";
+  if(s.includes("CM") || s.includes("DM") || s.includes("AM") || s.includes("MF") || s.includes("MID")) return "MF";
+  if(s.includes("ST") || s.includes("CF") || s.includes("LW") || s.includes("RW") || s.includes("FW") || s.includes("ATT")) return "FW";
+  return s.length <= 3 ? s : s.slice(0,3);
+}
+
+function fmtM(v){
+  // 120.5 -> "120.5 M"
+  if(!v) return "0";
+  const n = Math.round(v * 10) / 10;
+  return String(n);
+}
+
+/* =========================
+   Data
+========================= */
+let all = [];      // all rows
+let clubs = [];    // unique clubs
+let currentClub = ""; // selected
+
+function buildClubFilter(){
+  const sel = document.getElementById("clubFilter");
+  sel.innerHTML = `<option value="">Select Club</option>`;
+  clubs.sort().forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+function computeSummary(rows){
+  const playersCount = rows.length;
+  const ages = rows.map(r=>r.age).filter(a=>Number.isFinite(a));
+  const avgAge = ages.length ? (ages.reduce((a,b)=>a+b,0) / ages.length) : null;
+
+  const totalValue = rows.reduce((sum,r)=> sum + (r.value || 0), 0);
+
+  let mvp = null;
+  rows.forEach(r=>{
+    if(!mvp || (r.value||0) > (mvp.value||0)) mvp = r;
+  });
+
+  document.getElementById("sumPlayers").textContent = playersCount ? playersCount : "-";
+  document.getElementById("sumAvgAge").textContent = avgAge ? (Math.round(avgAge*10)/10) : "-";
+  document.getElementById("sumTotalValue").textContent = playersCount ? `${fmtM(totalValue)} M` : "-";
+  document.getElementById("sumMVP").textContent = mvp ? `${mvp.player} (${fmtM(mvp.value)} M)` : "-";
+}
+
+function applySort(rows){
+  const mode = document.getElementById("sortBy").value;
+
+  const sorted = rows.slice();
+  if(mode === "shirt_asc"){
+    sorted.sort((a,b)=> (a.shirt - b.shirt) || a.player.localeCompare(b.player));
+  } else if(mode === "value_desc"){
+    sorted.sort((a,b)=> (b.value - a.value) || a.player.localeCompare(b.player));
+  } else if(mode === "age_asc"){
+    sorted.sort((a,b)=> ((a.age ?? 999) - (b.age ?? 999)) || a.player.localeCompare(b.player));
+  } else if(mode === "name_asc"){
+    sorted.sort((a,b)=> a.player.localeCompare(b.player));
+  }
+  return sorted;
+}
+
+function render(){
+  const tbody = document.getElementById("tbody");
+  const empty = document.getElementById("empty");
+
+  const club = document.getElementById("clubFilter").value;
+  const pos = document.getElementById("posFilter").value;
+  const q = document.getElementById("search").value.trim().toLowerCase();
+
+  let rows = all.slice();
+
+  if(club) rows = rows.filter(r => r.club === club);
+  if(pos)  rows = rows.filter(r => r.pos === pos);
+  if(q)    rows = rows.filter(r => r.player.toLowerCase().includes(q));
+
+  rows = applySort(rows);
+
+  computeSummary(rows);
+
+  tbody.innerHTML = "";
+  if(rows.length === 0){
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  rows.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.shirt || ""}</td>
+      <td>
+        <div class="player-cell">
+          <img class="mini-logo" src="${teamLogoSrc(r.club)}" alt="${r.club}" onerror="this.style.display='none'">
+          <div style="min-width:0">
+            <div class="player-name">${r.player}</div>
+            <div class="muted">${r.club}</div>
+          </div>
+        </div>
+      </td>
+      <td>${r.pos || ""}</td>
+      <td>${Number.isFinite(r.age) ? r.age : ""}</td>
+      <td>${r.nat || ""}</td>
+      <td>${r.height || ""}</td>
+      <td>${r.foot ? `<span class="pill">${r.foot}</span>` : ""}</td>
+      <td>${fmtM(r.value)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =========================
+   Load
+========================= */
+fetch(squadsURL + "&t=" + Date.now(), { cache:"no-store" })
+  .then(r => r.text())
+  .then(csv => {
+    const data = parseCSV(csv);
+    const rows = data.slice(1);
+
+    all = rows.map(r => {
+      // Columns:
+      // 0 Club
+      // 1 #
+      // 2 Player
+      // 3 Position
+      // 4 Date of birth/Age
+      // 6 Nat.
+      // 7 Height
+      // 8 Foot
+      // 13 Market value( M)
+      const club = r[0] || "";
+      const shirt = Number(r[1]) || 0;
+      const player = r[2] || "";
+      const pos = normPos(r[3]);
+      const age = parseAge(r[4]);
+      const nat = r[6] || "";
+      const height = r[7] || "";
+      const foot = (r[8] || "").toUpperCase();
+      const value = parseMarketValue(r[13]);
+
+      return { club, shirt, player, pos, age, nat, height, foot, value };
+    }).filter(x => x.club && x.player);
+
+    clubs = [...new Set(all.map(x => x.club))];
+    buildClubFilter();
+
+    // Auto-select first club (اختياري)
+    if(clubs.length){
+      document.getElementById("clubFilter").value = clubs.sort()[0];
+    }
+
+    render();
+
+    document.getElementById("clubFilter").addEventListener("change", render);
+    document.getElementById("posFilter").addEventListener("change", render);
+    document.getElementById("sortBy").addEventListener("change", render);
+    document.getElementById("search").addEventListener("input", render);
+  })
+  .catch(err => console.error("Error loading squads sheet:", err));
+</script>
+
+</body>
+</html>
