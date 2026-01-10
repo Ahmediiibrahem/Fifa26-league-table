@@ -192,6 +192,31 @@ tr:nth-child(even){background:#1a1a1a}
 .stat .label{font-size:12px;opacity:.85;font-weight:700;}
 .stat .val{font-size:18px;font-weight:900;margin-top:4px;}
 
+/* small line inside stat for biggest win/loss */
+.subline{
+  margin-top:6px;
+  font-size:11px;
+  opacity:.9;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* badges */
+.pill-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:3px 8px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:11px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.pill-W{background:rgba(39,174,96,.25); border-color:rgba(39,174,96,.6);}
+.pill-L{background:rgba(231,76,60,.25); border-color:rgba(231,76,60,.6);}
+
 .meta-grid{
   display:grid;
   grid-template-columns:repeat(2, 1fr);
@@ -469,6 +494,18 @@ tr:nth-child(even){background:#1a1a1a}
           <div class="stat"><div class="label">Goals Against</div><div class="val" id="mGA">0</div></div>
           <div class="stat"><div class="label">Goal Diff</div><div class="val" id="mGD">0</div></div>
           <div class="stat"><div class="label">Points</div><div class="val" id="mPTS">0</div></div>
+
+          <!-- ✅ NEW -->
+          <div class="stat">
+            <div class="label">Biggest Win</div>
+            <div class="val" id="mBW">-</div>
+            <div class="subline" id="mBWLine"></div>
+          </div>
+          <div class="stat">
+            <div class="label">Biggest Loss</div>
+            <div class="val" id="mBL">-</div>
+            <div class="subline" id="mBLLine"></div>
+          </div>
         </div>
 
         <!-- Team scorers with show more -->
@@ -480,7 +517,7 @@ tr:nth-child(even){background:#1a1a1a}
           <div id="teamScorersBox" class="scorers-list"></div>
         </div>
 
-        <!-- ✅ Team matches -->
+        <!-- Team matches -->
         <div class="team-matches">
           <div class="team-matches-head">
             <div class="team-matches-title">Team Matches</div>
@@ -566,7 +603,7 @@ function normalizeResult(value){
 let teamInfoByName = {};
 let matchStatsByTeam = {};
 let teamScorersByTeam = {};
-let teamMatchesByTeam = {}; // ✅ NEW
+let teamMatchesByTeam = {};
 
 /* ===== SHOW MORE STATE ===== */
 let currentTeamForScorers = "";
@@ -575,7 +612,7 @@ const SCORERS_LIMIT = 5;
 
 /* ===== MATCHES TAB STATE ===== */
 let currentTeamForMatches = "";
-let matchesView = "Played"; // "Played" or "Upcoming"
+let matchesView = "Played";
 
 /* ===== BUILDERS ===== */
 function buildTeamInfo(teamsCSV){
@@ -610,9 +647,26 @@ function buildMatchStats(matchesCSV){
 
   function ensure(team){
     if(!matchStatsByTeam[team]){
-      matchStatsByTeam[team] = { P:0,W:0,D:0,L:0,GF:0,GA:0,PTS:0 };
+      matchStatsByTeam[team] = {
+        P:0,W:0,D:0,L:0,GF:0,GA:0,PTS:0,
+        biggestWin:null,
+        biggestLoss:null
+      };
     }
     return matchStatsByTeam[team];
+  }
+
+  function maybeSetBiggestWin(statsObj, diff, match){
+    if(diff <= 0) return;
+    if(!statsObj.biggestWin || diff > statsObj.biggestWin.diff){
+      statsObj.biggestWin = { diff, ...match };
+    }
+  }
+  function maybeSetBiggestLoss(statsObj, diff, match){
+    if(diff <= 0) return;
+    if(!statsObj.biggestLoss || diff > statsObj.biggestLoss.diff){
+      statsObj.biggestLoss = { diff, ...match };
+    }
   }
 
   rows.forEach(m=>{
@@ -623,6 +677,7 @@ function buildMatchStats(matchesCSV){
     const a = (m[11] || "").trim();
     const hs = +m[6] || 0;
     const as = +m[7] || 0;
+    const matchId = (m[1] || "").trim();
     if(!h || !a) return;
 
     const home = ensure(h);
@@ -642,6 +697,20 @@ function buildMatchStats(matchesCSV){
       away.W++; home.L++;
       away.PTS += 3;
     }
+
+    // Biggest win/loss
+    const matchObj = { matchId, home:h, away:a, hs, as };
+
+    const homeDiff = hs - as; // + => home won
+    const awayDiff = as - hs; // + => away won
+
+    if(homeDiff > 0){
+      maybeSetBiggestWin(home, homeDiff, matchObj);
+      maybeSetBiggestLoss(away, homeDiff, matchObj);
+    } else if(awayDiff > 0){
+      maybeSetBiggestWin(away, awayDiff, matchObj);
+      maybeSetBiggestLoss(home, awayDiff, matchObj);
+    }
   });
 }
 
@@ -659,7 +728,6 @@ function buildTeamScorers(scorersCSV){
   });
 }
 
-/* ✅ NEW: build matches list per team */
 function buildTeamMatches(matchesCSV){
   const rows = parseCSV(matchesCSV).slice(1);
   teamMatchesByTeam = {};
@@ -675,7 +743,7 @@ function buildTeamMatches(matchesCSV){
     const away = (m[11] || "").trim();
     const hs = m[6];
     const as = m[7];
-    const status = (m[15] || "").trim(); // Played / Upcoming
+    const status = (m[15] || "").trim();
     if(!matchId || !home || !away || !status) return;
 
     const item = {
@@ -691,13 +759,12 @@ function buildTeamMatches(matchesCSV){
     push(away, item);
   });
 
-  // sort each team matches by matchId numeric
   Object.keys(teamMatchesByTeam).forEach(team=>{
     teamMatchesByTeam[team].sort((a,b)=> (+a.matchId) - (+b.matchId));
   });
 }
 
-/* ===== SCORERS RENDER (Top 5 + Show more + 🥇 for top scorer/ties) ===== */
+/* ===== SCORERS RENDER ===== */
 function getSortedScorers(teamName){
   const playersMap = teamScorersByTeam[teamName] || null;
   if(!playersMap) return [];
@@ -746,20 +813,14 @@ function renderTeamScorers(teamName){
   }
 }
 
-/* ✅ NEW: render matches list inside modal */
+/* ===== MATCHES RENDER ===== */
 function calcTeamResult(team, match){
   if(match.status !== "Played") return "";
   const hs = Number(match.hs);
   const as = Number(match.as);
   if(!Number.isFinite(hs) || !Number.isFinite(as)) return "";
-
   if(hs === as) return "D";
-
-  // if team is home
-  if(match.home === team){
-    return (hs > as) ? "W" : "L";
-  }
-  // team is away
+  if(match.home === team) return (hs > as) ? "W" : "L";
   return (as > hs) ? "W" : "L";
 }
 
@@ -808,7 +869,10 @@ function renderTeamMatches(teamName){
 function openTeamModal(teamName){
   const modal = document.getElementById("teamModal");
   const info = teamInfoByName[teamName] || null;
-  const st = matchStatsByTeam[teamName] || { P:0,W:0,D:0,L:0,GF:0,GA:0,PTS:0 };
+  const st = matchStatsByTeam[teamName] || {
+    P:0,W:0,D:0,L:0,GF:0,GA:0,PTS:0,
+    biggestWin:null,biggestLoss:null
+  };
 
   document.getElementById("modalTeamName").textContent = teamName;
 
@@ -827,12 +891,37 @@ function openTeamModal(teamName){
   document.getElementById("mGD").textContent = (st.GF - st.GA);
   document.getElementById("mPTS").textContent = st.PTS;
 
+  // Biggest win/loss UI
+  const bw = st.biggestWin;
+  const bl = st.biggestLoss;
+
+  const bwVal = document.getElementById("mBW");
+  const bwLine = document.getElementById("mBWLine");
+  const blVal = document.getElementById("mBL");
+  const blLine = document.getElementById("mBLLine");
+
+  if(bw){
+    bwVal.innerHTML = `<span class="pill-badge pill-W">W +${bw.diff}</span>`;
+    bwLine.textContent = `#${bw.matchId} • ${bw.home} ${bw.hs}-${bw.as} ${bw.away}`;
+  }else{
+    bwVal.textContent = "-";
+    bwLine.textContent = "";
+  }
+
+  if(bl){
+    blVal.innerHTML = `<span class="pill-badge pill-L">L -${bl.diff}</span>`;
+    blLine.textContent = `#${bl.matchId} • ${bl.home} ${bl.hs}-${bl.as} ${bl.away}`;
+  }else{
+    blVal.textContent = "-";
+    blLine.textContent = "";
+  }
+
   // scorers state reset per open
   currentTeamForScorers = teamName;
   scorersExpanded = false;
   renderTeamScorers(teamName);
 
-  // ✅ matches state reset per open
+  // matches state reset per open
   currentTeamForMatches = teamName;
   matchesView = "Played";
   document.getElementById("tabPlayed").classList.add("active");
@@ -879,7 +968,7 @@ document.getElementById("scorersToggleBtn").addEventListener("click", ()=>{
   renderTeamScorers(currentTeamForScorers);
 });
 
-/* ✅ Matches tabs */
+/* Matches tabs */
 document.getElementById("tabPlayed").addEventListener("click", ()=>{
   if(!currentTeamForMatches) return;
   matchesView = "Played";
@@ -906,7 +995,7 @@ Promise.all([
 
   buildTeamInfo(teamsCSV);
   buildMatchStats(matchesCSV);
-  buildTeamMatches(matchesCSV); // ✅ NEW
+  buildTeamMatches(matchesCSV);
   buildTeamScorers(scorersCSV);
 
   // Form sheet
@@ -995,7 +1084,7 @@ document.querySelector(".rules-toggle").addEventListener("click", function() {
   this.innerHTML = content.classList.contains("open") ? "Rules ▲" : "Rules ▼";
 });
 
-// ✅ Go to player comparison page when clicking the top logos
+// Go to player comparison page when clicking the top logos
 document.querySelectorAll(".logo-box").forEach(box=>{
   box.addEventListener("click", ()=>{
     window.location.href = "pages/player-stats.html";
