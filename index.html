@@ -37,7 +37,6 @@ body{
   background:linear-gradient(rgba(15,15,15,.85),rgba(15,15,15,.85)),url("assets/img/standings-bg.jpg");
   background-size:cover;background-attachment:fixed;
 }
-
 h2{text-align:center;margin-bottom:15px;font-weight:800}
 
 /* ===== TABLE ===== */
@@ -45,25 +44,11 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 th{background:#2b2b2b;padding:10px;font-weight:800;text-align:center}
 td{padding:8px;text-align:center}
 tr:nth-child(even){background:#1a1a1a}
-
-.rank{
-  background:#3a3a3a;
-  font-weight:800;
-}
-
-/* عمود اللوجو – أفتح شوية من # */
-.logo-col{
-  background:rgba(58,58,58,.6);
-}
+.rank{background:#3a3a3a;font-weight:800;}
+.logo-col{background:rgba(58,58,58,.6);}
 
 /* ===== TEAM NAME (only this is left aligned) ===== */
-.team-name{
-  text-align:left;
-  padding-left:10px;
-  white-space:nowrap;
-}
-
-/* clickable */
+.team-name{text-align:left;padding-left:10px;white-space:nowrap;}
 .team-click{cursor:pointer;}
 .team-click:hover{text-decoration:underline;text-underline-offset:4px;}
 .logo-col img{cursor:pointer}
@@ -121,33 +106,21 @@ tr:nth-child(even){background:#1a1a1a}
   box-shadow:0 20px 60px rgba(0,0,0,.55);
   overflow:hidden;
 }
-
 .modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 16px;
-  background:rgba(43,43,43,.9);
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 16px;background:rgba(43,43,43,.9);
 }
 .modal-title{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  font-weight:900;
-  font-size:18px;
+  display:flex;align-items:center;gap:12px;
+  font-weight:900;font-size:18px;
 }
 .modal-title img{
   width:34px;height:34px;object-fit:contain;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
 .modal-close{
-  border:none;
-  background:#3498db;
-  color:#fff;
-  font-weight:900;
-  border-radius:10px;
-  padding:8px 12px;
-  cursor:pointer;
+  border:none;background:#3498db;color:#fff;font-weight:900;
+  border-radius:10px;padding:8px 12px;cursor:pointer;
 }
 .modal-close:hover{filter:brightness(1.05);}
 
@@ -192,31 +165,6 @@ tr:nth-child(even){background:#1a1a1a}
 .stat .label{font-size:12px;opacity:.85;font-weight:700;}
 .stat .val{font-size:18px;font-weight:900;margin-top:4px;}
 
-/* small line inside stat for biggest win/loss */
-.subline{
-  margin-top:6px;
-  font-size:11px;
-  opacity:.9;
-  line-height:1.2;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-/* badges */
-.pill-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:3px 8px;
-  border-radius:999px;
-  font-weight:900;
-  font-size:11px;
-  border:1px solid rgba(255,255,255,.12);
-}
-.pill-W{background:rgba(39,174,96,.25); border-color:rgba(39,174,96,.6);}
-.pill-L{background:rgba(231,76,60,.25); border-color:rgba(231,76,60,.6);}
-
 .meta-grid{
   display:grid;
   grid-template-columns:repeat(2, 1fr);
@@ -246,6 +194,47 @@ tr:nth-child(even){background:#1a1a1a}
 .rating .k{font-size:12px;opacity:.85;font-weight:700;}
 .rating .v{font-size:18px;font-weight:900;margin-top:4px;}
 
+/* badges */
+.pill-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:3px 8px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:11px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.pill-W{background:rgba(39,174,96,.25); border-color:rgba(39,174,96,.6);}
+.pill-L{background:rgba(231,76,60,.25); border-color:rgba(231,76,60,.6);}
+
+.bw-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:rgba(30,30,30,.65);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:8px 10px;
+}
+.bw-left{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+  text-align:left;
+}
+.bw-title{font-size:12px;opacity:.85;font-weight:800;}
+.bw-line{
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  opacity:.95;
+}
+
 /* ===== Team scorers list ===== */
 .team-scorers{
   margin-top:12px;
@@ -253,75 +242,31 @@ tr:nth-child(even){background:#1a1a1a}
   border-top:1px solid rgba(255,255,255,.10);
 }
 .team-scorers-title{
-  font-size:13px;
-  font-weight:900;
-  opacity:.9;
-  margin-bottom:8px;
-  text-align:left;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
+  font-size:13px;font-weight:900;opacity:.9;margin-bottom:8px;
+  text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px;
 }
-.scorers-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
+.scorers-list{display:flex;flex-direction:column;gap:8px;}
 .scorer-item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
   background:rgba(30,30,30,.65);
   border:1px solid rgba(255,255,255,.08);
-  padding:8px 10px;
-  border-radius:12px;
+  padding:8px 10px;border-radius:12px;
 }
-.scorer-left{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-}
+.scorer-left{display:flex;align-items:center;gap:8px;min-width:0;}
 .scorer-name{
-  font-weight:900;
-  text-align:left;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  font-weight:900;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.scorer-badge{
-  font-size:14px;
-  line-height:1;
-}
+.scorer-badge{font-size:14px;line-height:1;}
 .scorer-goals{
-  background:#3498db;
-  border-radius:999px;
-  padding:4px 10px;
-  font-weight:900;
-  font-size:12px;
-  line-height:1;
-  white-space:nowrap;
+  background:#3498db;border-radius:999px;padding:4px 10px;
+  font-weight:900;font-size:12px;line-height:1;white-space:nowrap;
 }
-.scorer-empty{
-  font-size:12px;
-  opacity:.85;
-  text-align:left;
-  line-height:1.35;
-}
+.scorer-empty{font-size:12px;opacity:.85;text-align:left;line-height:1.35;}
 
-/* Show more button */
 .show-more-btn{
-  border:none;
-  background:rgba(52,152,219,.18);
-  color:#fff;
-  font-weight:900;
+  border:none;background:rgba(52,152,219,.18);color:#fff;font-weight:900;
   border:1px solid rgba(52,152,219,.5);
-  border-radius:10px;
-  padding:6px 10px;
-  cursor:pointer;
-  font-size:12px;
+  border-radius:10px;padding:6px 10px;cursor:pointer;font-size:12px;
 }
 .show-more-btn:hover{background:rgba(52,152,219,.28);}
 
@@ -338,32 +283,15 @@ tr:nth-child(even){background:#1a1a1a}
   gap:10px;
   margin-bottom:10px;
 }
-.team-matches-title{
-  font-size:13px;
-  font-weight:900;
-  opacity:.9;
-  text-align:left;
-}
-.matches-tabs{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
+.team-matches-title{font-size:13px;font-weight:900;opacity:.9;text-align:left;}
+.matches-tabs{display:flex;gap:8px;flex-wrap:wrap;}
 .mtab{
-  border:none;
-  cursor:pointer;
-  font-weight:900;
-  font-size:12px;
-  color:#fff;
-  padding:6px 10px;
-  border-radius:999px;
+  border:none;cursor:pointer;font-weight:900;font-size:12px;color:#fff;
+  padding:6px 10px;border-radius:999px;
   background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.12);
 }
-.mtab.active{
-  background:rgba(52,152,219,.35);
-  border-color:rgba(52,152,219,.7);
-}
+.mtab.active{background:rgba(52,152,219,.35);border-color:rgba(52,152,219,.7);}
 .mtab:hover{filter:brightness(1.05);}
 
 .matches-wrap{
@@ -494,18 +422,6 @@ tr:nth-child(even){background:#1a1a1a}
           <div class="stat"><div class="label">Goals Against</div><div class="val" id="mGA">0</div></div>
           <div class="stat"><div class="label">Goal Diff</div><div class="val" id="mGD">0</div></div>
           <div class="stat"><div class="label">Points</div><div class="val" id="mPTS">0</div></div>
-
-          <!-- ✅ NEW -->
-          <div class="stat">
-            <div class="label">Biggest Win</div>
-            <div class="val" id="mBW">-</div>
-            <div class="subline" id="mBWLine"></div>
-          </div>
-          <div class="stat">
-            <div class="label">Biggest Loss</div>
-            <div class="val" id="mBL">-</div>
-            <div class="subline" id="mBLLine"></div>
-          </div>
         </div>
 
         <!-- Team scorers with show more -->
@@ -563,6 +479,27 @@ tr:nth-child(even){background:#1a1a1a}
           <div class="meta"><div class="k">Level</div><div class="v" id="tLevel">-</div></div>
           <div class="meta"><div class="k">International Rank</div><div class="v" id="tRank">-</div></div>
           <div class="meta" style="grid-column:1/-1"><div class="k">Key Player</div><div class="v" id="tKey">-</div></div>
+
+          <!-- ✅ NEW: Biggest Win/Loss under Key Player -->
+          <div class="meta" style="grid-column:1/-1">
+            <div class="k">Biggest Win / Loss</div>
+
+            <div class="bw-row" style="margin-top:8px;">
+              <div class="bw-left">
+                <div class="bw-title">Biggest Win</div>
+                <div class="bw-line" id="bwLine">-</div>
+              </div>
+              <span class="pill-badge pill-W" id="bwBadge" style="display:none;">W</span>
+            </div>
+
+            <div class="bw-row" style="margin-top:8px;">
+              <div class="bw-left">
+                <div class="bw-title">Biggest Loss</div>
+                <div class="bw-line" id="blLine">-</div>
+              </div>
+              <span class="pill-badge pill-L" id="blBadge" style="display:none;">L</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -698,11 +635,10 @@ function buildMatchStats(matchesCSV){
       away.PTS += 3;
     }
 
-    // Biggest win/loss
     const matchObj = { matchId, home:h, away:a, hs, as };
 
-    const homeDiff = hs - as; // + => home won
-    const awayDiff = as - hs; // + => away won
+    const homeDiff = hs - as;
+    const awayDiff = as - hs;
 
     if(homeDiff > 0){
       maybeSetBiggestWin(home, homeDiff, matchObj);
@@ -717,7 +653,6 @@ function buildMatchStats(matchesCSV){
 function buildTeamScorers(scorersCSV){
   const rows = parseCSV(scorersCSV).slice(1);
   teamScorersByTeam = {};
-
   rows.forEach(r=>{
     const team = (r[2] || "").trim();
     const player = (r[3] || "").trim();
@@ -891,37 +826,39 @@ function openTeamModal(teamName){
   document.getElementById("mGD").textContent = (st.GF - st.GA);
   document.getElementById("mPTS").textContent = st.PTS;
 
-  // Biggest win/loss UI
+  // Biggest Win/Loss (RIGHT COLUMN)
   const bw = st.biggestWin;
   const bl = st.biggestLoss;
 
-  const bwVal = document.getElementById("mBW");
-  const bwLine = document.getElementById("mBWLine");
-  const blVal = document.getElementById("mBL");
-  const blLine = document.getElementById("mBLLine");
+  const bwLine = document.getElementById("bwLine");
+  const blLine = document.getElementById("blLine");
+  const bwBadge = document.getElementById("bwBadge");
+  const blBadge = document.getElementById("blBadge");
 
   if(bw){
-    bwVal.innerHTML = `<span class="pill-badge pill-W">W +${bw.diff}</span>`;
     bwLine.textContent = `#${bw.matchId} • ${bw.home} ${bw.hs}-${bw.as} ${bw.away}`;
+    bwBadge.style.display = "inline-flex";
+    bwBadge.textContent = `W +${bw.diff}`;
   }else{
-    bwVal.textContent = "-";
-    bwLine.textContent = "";
+    bwLine.textContent = "-";
+    bwBadge.style.display = "none";
   }
 
   if(bl){
-    blVal.innerHTML = `<span class="pill-badge pill-L">L -${bl.diff}</span>`;
     blLine.textContent = `#${bl.matchId} • ${bl.home} ${bl.hs}-${bl.as} ${bl.away}`;
+    blBadge.style.display = "inline-flex";
+    blBadge.textContent = `L -${bl.diff}`;
   }else{
-    blVal.textContent = "-";
-    blLine.textContent = "";
+    blLine.textContent = "-";
+    blBadge.style.display = "none";
   }
 
-  // scorers state reset per open
+  // scorers reset
   currentTeamForScorers = teamName;
   scorersExpanded = false;
   renderTeamScorers(teamName);
 
-  // matches state reset per open
+  // matches reset
   currentTeamForMatches = teamName;
   matchesView = "Played";
   document.getElementById("tabPlayed").classList.add("active");
