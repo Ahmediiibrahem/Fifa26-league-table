@@ -20,7 +20,6 @@
   opacity:.95;
 }
 
-
 /* ===== NAV ===== */
 nav{display:flex;justify-content:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
 nav a{
@@ -300,6 +299,95 @@ tr:nth-child(even){background:#1a1a1a}
   font-size:12px;
 }
 .show-more-btn:hover{background:rgba(52,152,219,.28);}
+
+/* ===== Team matches list ===== */
+.team-matches{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+.team-matches-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.team-matches-title{
+  font-size:13px;
+  font-weight:900;
+  opacity:.9;
+  text-align:left;
+}
+.matches-tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.mtab{
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  font-size:12px;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+}
+.mtab.active{
+  background:rgba(52,152,219,.35);
+  border-color:rgba(52,152,219,.7);
+}
+.mtab:hover{filter:brightness(1.05);}
+
+.matches-wrap{
+  width:100%;
+  overflow:auto;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.matches-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+  min-width:620px;
+}
+.matches-table th{
+  background:rgba(43,43,43,.9);
+  padding:10px 8px;
+  text-align:center;
+  font-weight:900;
+  white-space:nowrap;
+}
+.matches-table td{
+  padding:9px 8px;
+  text-align:center;
+  white-space:nowrap;
+}
+.matches-table tr:nth-child(even){background:rgba(26,26,26,.75);}
+
+.match-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:11px;
+  border:1px solid rgba(255,255,255,.12);
+}
+.badge-W{background:rgba(39,174,96,.25); border-color:rgba(39,174,96,.6);}
+.badge-D{background:rgba(127,140,141,.25); border-color:rgba(127,140,141,.6);}
+.badge-L{background:rgba(231,76,60,.25); border-color:rgba(231,76,60,.6);}
+
+.match-empty{
+  font-size:12px;
+  opacity:.85;
+  text-align:left;
+  line-height:1.35;
+  padding:10px 2px 0 2px;
+}
 </style>
 </head>
 
@@ -322,7 +410,6 @@ tr:nth-child(even){background:#1a1a1a}
   <a href="pages/scorers.html">Scorers</a>
   <a href="pages/squads.html">Squads</a>
 </nav>
-
 
 <h2>League Table</h2>
 
@@ -392,6 +479,34 @@ tr:nth-child(even){background:#1a1a1a}
           </div>
           <div id="teamScorersBox" class="scorers-list"></div>
         </div>
+
+        <!-- ✅ Team matches -->
+        <div class="team-matches">
+          <div class="team-matches-head">
+            <div class="team-matches-title">Team Matches</div>
+            <div class="matches-tabs">
+              <button id="tabPlayed" class="mtab active" type="button">Played</button>
+              <button id="tabUpcoming" class="mtab" type="button">Upcoming</button>
+            </div>
+          </div>
+
+          <div class="matches-wrap">
+            <table class="matches-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Home</th>
+                  <th>Score</th>
+                  <th>Away</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody id="teamMatchesBody"></tbody>
+            </table>
+          </div>
+
+          <div id="teamMatchesEmpty" class="match-empty" style="display:none;"></div>
+        </div>
       </div>
 
       <div class="box">
@@ -451,11 +566,16 @@ function normalizeResult(value){
 let teamInfoByName = {};
 let matchStatsByTeam = {};
 let teamScorersByTeam = {};
+let teamMatchesByTeam = {}; // ✅ NEW
 
 /* ===== SHOW MORE STATE ===== */
 let currentTeamForScorers = "";
 let scorersExpanded = false;
 const SCORERS_LIMIT = 5;
+
+/* ===== MATCHES TAB STATE ===== */
+let currentTeamForMatches = "";
+let matchesView = "Played"; // "Played" or "Upcoming"
 
 /* ===== BUILDERS ===== */
 function buildTeamInfo(teamsCSV){
@@ -539,6 +659,44 @@ function buildTeamScorers(scorersCSV){
   });
 }
 
+/* ✅ NEW: build matches list per team */
+function buildTeamMatches(matchesCSV){
+  const rows = parseCSV(matchesCSV).slice(1);
+  teamMatchesByTeam = {};
+
+  function push(team, item){
+    if(!teamMatchesByTeam[team]) teamMatchesByTeam[team] = [];
+    teamMatchesByTeam[team].push(item);
+  }
+
+  rows.forEach(m=>{
+    const matchId = (m[1] || "").trim();
+    const home = (m[2] || "").trim();
+    const away = (m[11] || "").trim();
+    const hs = m[6];
+    const as = m[7];
+    const status = (m[15] || "").trim(); // Played / Upcoming
+    if(!matchId || !home || !away || !status) return;
+
+    const item = {
+      matchId,
+      home,
+      away,
+      hs: (hs === "" || hs == null) ? "" : +hs,
+      as: (as === "" || as == null) ? "" : +as,
+      status
+    };
+
+    push(home, item);
+    push(away, item);
+  });
+
+  // sort each team matches by matchId numeric
+  Object.keys(teamMatchesByTeam).forEach(team=>{
+    teamMatchesByTeam[team].sort((a,b)=> (+a.matchId) - (+b.matchId));
+  });
+}
+
 /* ===== SCORERS RENDER (Top 5 + Show more + 🥇 for top scorer/ties) ===== */
 function getSortedScorers(teamName){
   const playersMap = teamScorersByTeam[teamName] || null;
@@ -563,8 +721,6 @@ function renderTeamScorers(teamName){
   }
 
   const showList = scorersExpanded ? listAll : listAll.slice(0, SCORERS_LIMIT);
-
-  // top goals for badge (ties included)
   const topGoals = listAll[0].goals;
 
   showList.forEach(item=>{
@@ -582,13 +738,70 @@ function renderTeamScorers(teamName){
     box.appendChild(row);
   });
 
-  // Show more button
   if(listAll.length > SCORERS_LIMIT){
     btn.style.display = "inline-flex";
     btn.textContent = scorersExpanded ? "Show less" : "Show more";
   } else {
     btn.style.display = "none";
   }
+}
+
+/* ✅ NEW: render matches list inside modal */
+function calcTeamResult(team, match){
+  if(match.status !== "Played") return "";
+  const hs = Number(match.hs);
+  const as = Number(match.as);
+  if(!Number.isFinite(hs) || !Number.isFinite(as)) return "";
+
+  if(hs === as) return "D";
+
+  // if team is home
+  if(match.home === team){
+    return (hs > as) ? "W" : "L";
+  }
+  // team is away
+  return (as > hs) ? "W" : "L";
+}
+
+function renderTeamMatches(teamName){
+  const body = document.getElementById("teamMatchesBody");
+  const empty = document.getElementById("teamMatchesEmpty");
+  body.innerHTML = "";
+  empty.style.display = "none";
+  empty.textContent = "";
+
+  const allMatches = teamMatchesByTeam[teamName] || [];
+  const list = allMatches.filter(m => m.status === matchesView);
+
+  if(list.length === 0){
+    empty.style.display = "block";
+    empty.textContent = matchesView === "Played"
+      ? "No played matches recorded for this team yet."
+      : "No upcoming matches for this team.";
+    return;
+  }
+
+  list.forEach(m=>{
+    const res = calcTeamResult(teamName, m);
+    const scoreText = (m.status === "Played" && Number.isFinite(m.hs) && Number.isFinite(m.as))
+      ? `${m.hs} - ${m.as}`
+      : "-";
+
+    let badgeHTML = `<span class="match-badge badge-D">-</span>`;
+    if(res === "W") badgeHTML = `<span class="match-badge badge-W">W</span>`;
+    if(res === "D") badgeHTML = `<span class="match-badge badge-D">D</span>`;
+    if(res === "L") badgeHTML = `<span class="match-badge badge-L">L</span>`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${m.matchId}</td>
+      <td>${m.home}</td>
+      <td>${scoreText}</td>
+      <td>${m.away}</td>
+      <td>${m.status === "Played" ? badgeHTML : `<span class="match-badge badge-D">Upcoming</span>`}</td>
+    `;
+    body.appendChild(tr);
+  });
 }
 
 /* ===== MODAL ===== */
@@ -618,6 +831,13 @@ function openTeamModal(teamName){
   currentTeamForScorers = teamName;
   scorersExpanded = false;
   renderTeamScorers(teamName);
+
+  // ✅ matches state reset per open
+  currentTeamForMatches = teamName;
+  matchesView = "Played";
+  document.getElementById("tabPlayed").classList.add("active");
+  document.getElementById("tabUpcoming").classList.remove("active");
+  renderTeamMatches(teamName);
 
   // Team info
   document.getElementById("tATT").textContent = info ? info.att : "-";
@@ -659,6 +879,22 @@ document.getElementById("scorersToggleBtn").addEventListener("click", ()=>{
   renderTeamScorers(currentTeamForScorers);
 });
 
+/* ✅ Matches tabs */
+document.getElementById("tabPlayed").addEventListener("click", ()=>{
+  if(!currentTeamForMatches) return;
+  matchesView = "Played";
+  document.getElementById("tabPlayed").classList.add("active");
+  document.getElementById("tabUpcoming").classList.remove("active");
+  renderTeamMatches(currentTeamForMatches);
+});
+document.getElementById("tabUpcoming").addEventListener("click", ()=>{
+  if(!currentTeamForMatches) return;
+  matchesView = "Upcoming";
+  document.getElementById("tabUpcoming").classList.add("active");
+  document.getElementById("tabPlayed").classList.remove("active");
+  renderTeamMatches(currentTeamForMatches);
+});
+
 /* ===== LOAD EVERYTHING ===== */
 Promise.all([
   fetch(formURL + "&t=" + Date.now(), { cache:"no-store" }).then(r=>r.text()),
@@ -670,6 +906,7 @@ Promise.all([
 
   buildTeamInfo(teamsCSV);
   buildMatchStats(matchesCSV);
+  buildTeamMatches(matchesCSV); // ✅ NEW
   buildTeamScorers(scorersCSV);
 
   // Form sheet
@@ -757,14 +994,13 @@ document.querySelector(".rules-toggle").addEventListener("click", function() {
   content.classList.toggle("open");
   this.innerHTML = content.classList.contains("open") ? "Rules ▲" : "Rules ▼";
 });
+
 // ✅ Go to player comparison page when clicking the top logos
 document.querySelectorAll(".logo-box").forEach(box=>{
   box.addEventListener("click", ()=>{
-    window.location.href = "pages/player-stats.html"; // صفحة المقارنة
+    window.location.href = "pages/player-stats.html";
   });
 });
-
-  
 </script>
 
 </body>
